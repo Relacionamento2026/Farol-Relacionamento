@@ -31,7 +31,7 @@ Login Supabase → `getUser()` validado pelo Auth → leitura do próprio `profi
 | P1 / ATUAL → CORREÇÃO | Policies de Storage permitem upload/atualização ampla | Escrita institucional por ADM; avatar no caminho exato do próprio usuário | Upload institucional/alheio negado |
 | P1 / ATUAL → CORREÇÃO | Edge v11 não verifica perfil ativo no handler | JWT validado e perfil consultado com RLS antes da IA; detalhes técnicos não devolvidos ao cliente | Handler completo com rede simulada |
 | P2 / ATUAL → CORREÇÃO | Logout usa campos ausentes e listener pode reinvocar saída; login pendente pode reabrir tela | Limpeza tolerante a DOM ausente, controle de concorrência e listener sem chamada reentrante | Logout com erro e login pendente |
-| P2 / NOVO | Publicação não aguardava o workflow de sintaxe | Testes no próprio job de publicação; artefato limitado ao site | Revisão do YAML; execução GitHub pendente |
+| P2 / NOVO | Publicação não aguardava o workflow de sintaxe | Testes no próprio job de publicação; artefato limitado ao site | Revisão do YAML; primeira execução GitHub aprovada |
 
 ## Arquivos e rollback
 
@@ -62,7 +62,7 @@ Login Supabase → `getUser()` validado pelo Auth → leitura do próprio `profi
 
 A suíte usa Node 24, PGlite 0.5.8/PostgreSQL 18.3 e registros sintéticos. O projeto de referência usa PostgreSQL 17.6; este teste não comprova equivalência de runtime Supabase. O fixture reproduz tipos de perfis/notas, policies e funções inspecionados; tabelas não relacionadas têm estrutura reduzida. Sem chamadas de modelo ou gravações remotas.
 
-Cobertura: identidade ausente/expirada, perfil inválido/inativo, acesso comum e de monitor/ADM, navegação administrativa, logout, login concorrente; SQL direto com `SET LOCAL ROLE` e identidade JWT simulada; leitura própria, escrita permitida, acesso cruzado negado, alteração de campos de autorização, proteção de avatar; Edge sem sessão e com conta inativa; geração da lista e reversão transacional. O teste de script valida sintaxe JavaScript, **não** renderização integral do HTML. Testes de navegador, login com senha real, entrega de eventos e revogação real no Auth ainda **necessitam validação**.
+Cobertura: identidade ausente/expirada, perfil inválido/inativo, acesso comum e de monitor/ADM, navegação administrativa, logout, login concorrente; SQL direto com `SET LOCAL ROLE` e identidade JWT simulada; leitura própria, escrita permitida, acesso cruzado negado, alteração de campos de autorização, proteção de avatar; Edge sem sessão e com conta inativa; geração da lista e reversão transacional. O teste de script valida sintaxe JavaScript, **não** renderização integral do HTML. Dez cenários de navegação/estado passaram em Chromium com SDK simulado, conforme `docs/homologacao-acessos.md`. Integração no navegador com SDK real, login com senha real, entrega de eventos e revogação real no Auth ainda **necessitam validação**.
 
 ## Riscos residuais e próximas etapas
 
