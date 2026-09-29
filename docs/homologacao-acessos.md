@@ -59,29 +59,34 @@ e [Supabase local development](https://supabase.com/docs/guides/local-developmen
 5. Aplicar a migration e a Edge no ambiente isolado. Não executar o SQL privado
    de cadastros reais nele; usar fixtures sintéticos equivalentes à regra.
 
-## Matriz de aceite real — todos os itens pendentes
+## Matriz de aceite e limites após teste local real
 
-| Caso | Resultado obrigatório |
+| Caso | Resultado no ambiente local real |
 |---|---|
-| Login válido, recarga e renovação | Identidade validada e acesso legítimo preservado |
-| Ausência de sessão / token expirado | Dados negados; tela bloqueada sem reabrir com resposta atrasada |
-| Colaborador lê própria nota | Somente notas da identidade autenticada |
-| Colaborador consulta ID de outro via REST | Nenhum dado de terceiro, independentemente de filtros da UI |
-| Colaborador tenta inserir, editar ou excluir notas | Operação negada e banco inalterado |
-| Cada monitor lê/lança/edita no grupo | Operação permitida para destinatário ativo monitorado |
-| Monitor consulta ou escreve fora do grupo | Operação negada e banco inalterado |
-| Monitor troca destinatário para fora do grupo | UPDATE negado; registro original preservado |
-| ADM administra registros | Leitura/escrita legítimas preservadas |
-| Perfil comum tenta ação administrativa | Negada também na chamada direta |
-| Alteração de localStorage/objeto JS | Pode afetar apresentação, nunca ampliar direitos no servidor |
-| Alteração de role, ativo, avaliado, departamento ou e-mail próprios | Campos protegidos rejeitados pelo servidor |
-| Inativação/rebaixamento durante sessão | Próxima operação respeita estado atual; avaliar atualização da UI |
-| Logout e login de outra pessoa no mesmo navegador | Sem dados da pessoa anterior na interface |
-| Storage: avatar próprio, avatar alheio e arquivo institucional | Próprio permitido; alheio/institucional restritos conforme regra |
-| Edge: sem token, token inválido e perfil inativo | Rejeição antes de consumir IA |
-| Edge: perfil ativo autorizado | Resposta normal sem expor detalhes sensíveis |
-| RPCs legadas e listagem de monitorados | Chamadores indevidos bloqueados |
-| Recursos comuns e treinamento | Funcionamento legítimo preservado |
+| Login válido e confirmação de identidade no Auth | Aprovado; senha incorreta rejeitada |
+| Ausência de sessão e token inválido | Sem acesso às notas; expiração natural ainda pendente |
+| Colaborador lê própria nota / consulta ID de terceiro | Aprovado; somente nota própria |
+| Colaborador tenta inserir, editar ou excluir notas | Bloqueado; estado persistido conferido |
+| Cada um dos dois monitores lê/lança no grupo | Aprovado |
+| Monitor tenta inserir fora do grupo ou reatribuir destinatário | Bloqueado |
+| Monitor edita nota autorizada | Aprovado; DELETE de monitor bloqueado |
+| ADM lê todas as notas e exclui registro | Aprovado; demais módulos administrativos ainda pendentes |
+| Alteração de role, ativo, avaliado, departamento ou e-mail próprios | Rejeitada pelo servidor |
+| Rebaixamento/inativação com token já emitido | Próxima chamada respeita o perfil atual |
+| Logout | Refresh token revogado; não implica invalidação imediata de todo access token |
+| Avatar próprio / alheio / arquivo institucional | Próprio permitido; alheio e institucional negados ao comum; institucional permitido ao ADM |
+| RPC de monitorados e RPC legada | Listagem respeita perfil; legado indisponível ao cliente comum |
+| Rollback | Policies anteriores restauradas e notas preservadas |
+| Manipulação do navegador / troca de perfil na UI | Dez cenários com mock aprovados anteriormente; SDK real na UI pendente |
+| Edge | Handler com rede simulada aprovado; runtime Deno real pendente |
+| Realtime, recursos comuns e treinamentos completos | Necessita validação |
+
+Execução comprovada: [GitHub Actions 36629144752](https://github.com/Relacionamento2026/Farol-Relacionamento/actions/runs/36629144752),
+commit `a2410ae9fc71bbec278f91103007375fb5854299`, em 29/09/2026.
+Treze cenários aprovados; Node reporta 14 testes contando a suíte principal.
+Nenhuma falha. O job confirmou encerramento e remoção dos volumes locais.
+Os 22 testes anteriores também passaram no mesmo commit. Não somar simulações
+a testes integrados como se todos comprovassem o mesmo nível de cobertura.
 
 Registrar resposta HTTP, quantidade de linhas e estado final no banco: sucesso
 HTTP com zero linhas não comprova escrita. Incluir tentativa de DELETE e troca
