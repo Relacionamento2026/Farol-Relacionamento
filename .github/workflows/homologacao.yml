@@ -1,0 +1,26 @@
+name: Homologação local sem serviços pagos
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  supabase-local:
+    # Standard runners are free for public repositories. Do not run if made private.
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm ci
+      - run: node tests/integration/prepare.mjs
+      - name: Start disposable local services (no cloud login/link)
+        run: npx --no-install supabase start --workdir test-results/integration -x studio,imgproxy,logflare,vector,supavisor,edge-runtime,realtime,postgres-meta > test-results/integration/start.log
+      - name: Test real local Auth, REST, Storage, RLS and rollback
+        run: node --test tests/integration/access.test.mjs
+      - name: Delete disposable local volumes
+        if: always()
+        run: npx --no-install supabase stop --workdir test-results/integration --no-backup

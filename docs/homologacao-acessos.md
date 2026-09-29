@@ -10,14 +10,41 @@ real, RLS, gráficos ou gravação de notas.
 Nenhuma migration, alteração de cadastro
 ou Edge Function deste pacote foi aplicada em produção. O banco TESTE é proibido.
 
-## Ambiente necessário
+## Ambiente sem custo adicional
 
-Usar ambiente novo e isolado, com schema compatível com a referência, PostgreSQL
-17 e serviços Auth, REST, Storage e Edge. Não copiar dados de colaboradores.
-Não há branch disponível no projeto autorizado na consulta desta data.
-A organização e o custo precisam ser confirmados antes de provisionar uma branch.
-Não se deve presumir que uma branch tenha o schema completo: comparar o histórico
-de migrations e os objetos reais antes de aplicar este pacote.
+Orçamento obrigatório: zero. Branch paga descartada. O workflow
+`.github/workflows/homologacao.yml` usa executor padrão Linux do GitHub em
+repositório público, sem cache nem upload de artefatos. Se o repositório se tornar
+privado, o job não roda. Não usar executores maiores ou serviços pagos.
+
+O job cria Supabase **local no executor descartável**, com PostgreSQL 17, Auth,
+REST e Storage reais. Não faz login/link em projeto cloud, não recebe secrets de
+produção e encerra os containers apagando somente os volumes de teste ao final.
+São sete contas fictícias, incluindo dois monitores. O teste aceita apenas URLs
+127.0.0.1 nas portas locais esperadas. Não consulta produção nem TESTE.
+
+CLI fixada em 2.118.0 e pg em 8.23.0. Usa o fixture existente do aplicativo,
+conservando schemas/funções Auth e Storage reais. Não é uma cópia completa do
+banco corporativo. A configuração Auth de produção, Edge/Deno real, Realtime,
+SDK no navegador e inventário integral de grants ainda necessitam validação.
+
+Para reproduzir em máquina com runtime de containers compatível:
+
+```sh
+npm ci
+node tests/integration/prepare.mjs
+npx --no-install supabase start --workdir test-results/integration -x studio,imgproxy,logflare,vector,supavisor,edge-runtime,realtime,postgres-meta
+node --test tests/integration/access.test.mjs
+npx --no-install supabase stop --workdir test-results/integration --no-backup
+```
+
+O último comando apaga exclusivamente os dados fictícios dessa instância.
+Não executar contra diretório vinculado. A instância deve estar vazia; reexecução
+requer encerrá-la com `--no-backup` e iniciá-la novamente. O teste não apaga bancos
+existentes para contornar essa verificação.
+
+Referências: [GitHub Actions billing](https://docs.github.com/en/billing/concepts/product-billing/github-actions)
+e [Supabase local development](https://supabase.com/docs/guides/local-development).
 
 ## Preparação
 
