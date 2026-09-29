@@ -25,7 +25,7 @@ jobs:
         # Local function executes production handler; external model is intercepted.
         # No cloud deployment and no provider key.
         run: |
-          npx --no-install supabase functions serve --workdir test-results/integration > test-results/integration/functions.log 2>&1 &
+          npx --no-install supabase functions serve --workdir test-results/integration --env-file test-results/integration/functions.env > test-results/integration/functions.log 2>&1 &
           node --test tests/integration/access.test.mjs
       - name: Local runtime diagnostics on failure
         if: failure()

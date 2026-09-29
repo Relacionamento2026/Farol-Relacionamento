@@ -12,6 +12,7 @@ config=config.replace(/(\[auth\][\s\S]*?\n)enable_signup = true/,'$1enable_signu
 if(!/\[auth\][\s\S]*?enable_signup = false/.test(config))throw new Error('Closed registration required for validation');
 if (!/^major_version = 17$/m.test(config)) throw new Error('Expected PostgreSQL 17');
 writeFileSync(path,config);
+writeFileSync(`${dir}/functions.env`,'GEMINI_API_KEY=synthetic-not-a-real-key\n');
 const fn=`${dir}/supabase/functions/farol-validation`;
 mkdirSync(fn,{recursive:true});
 copyFileSync('tests/integration/edge-wrapper.ts',`${fn}/index.ts`);

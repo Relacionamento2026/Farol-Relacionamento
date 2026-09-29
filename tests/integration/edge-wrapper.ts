@@ -4,7 +4,6 @@ const nativeServe=Deno.serve;
 const origin=new URL(Deno.env.get('SUPABASE_URL')!);
 if (!['kong','127.0.0.1','localhost'].includes(origin.hostname) && !origin.hostname.startsWith('supabase_kong_')) throw new Error('Only local Supabase allowed');
 let modelCalls=0;
-Deno.env.set('GEMINI_API_KEY','synthetic-not-a-real-key');
 globalThis.fetch=async(input,init)=>{
  const url=new URL(typeof input==='string'?input:input instanceof URL?input.href:input.url);
  if(url.hostname==='generativelanguage.googleapis.com'){
