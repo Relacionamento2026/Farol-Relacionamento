@@ -26,12 +26,13 @@ São sete contas fictícias, incluindo dois monitores. O teste aceita apenas URL
 CLI fixada em 2.118.0 e pg em 8.23.0. Usa o fixture existente do aplicativo,
 conservando schemas/funções Auth e Storage reais. Não é uma cópia completa do
 banco corporativo. A configuração Auth de produção, Edge/Deno real, Realtime,
-SDK no navegador e inventário integral de grants ainda necessitam validação.
+inventário integral de constraints/funções e configurações corporativas ainda necessitam validação.
 
 Para reproduzir em máquina com runtime de containers compatível:
 
 ```sh
 npm ci
+npx --no-install playwright install --with-deps chromium
 node tests/integration/prepare.mjs
 npx --no-install supabase start --workdir test-results/integration -x studio,imgproxy,logflare,vector,supavisor,edge-runtime,realtime,postgres-meta
 node --test tests/integration/access.test.mjs
@@ -77,7 +78,7 @@ e [Supabase local development](https://supabase.com/docs/guides/local-developmen
 | Avatar próprio / alheio / arquivo institucional | Próprio permitido; alheio e institucional negados ao comum; institucional permitido ao ADM |
 | RPC de monitorados e RPC legada | Listagem respeita perfil; legado indisponível ao cliente comum |
 | Rollback | Policies anteriores restauradas e notas preservadas |
-| Manipulação do navegador / troca de perfil na UI | Dez cenários com mock aprovados anteriormente; SDK real na UI pendente |
+| Manipulação do navegador / troca de perfil na UI | Aprovado também com SDK real e banco local real; recarga confirma perfil atual |
 | Edge | Handler com rede simulada aprovado; runtime Deno real pendente |
 | Realtime, recursos comuns e treinamentos completos | Necessita validação |
 
@@ -104,3 +105,41 @@ Publicação depende da matriz aprovada e da revisão das lacunas registradas em
 devem estar preparados antes. A desativação dos seis colaboradores, o bloqueio
 no Auth e a mudança dos cadastros reais continuam pendentes. URLs de buckets
 públicos continuam acessíveis e exigem uma correção específica.
+
+## Validação de navegador com SDK real
+
+A suíte usa Chromium/Playwright 1.63.0, o SDK Supabase 2.39.0 e Chart.js 4.4.0,
+as mesmas versões das dependências servidas pelo HTML. O servidor de teste
+substitui somente configuração e URLs de dependências em memória; não entrega
+chave administrativa ao navegador e bloqueia conexões externas. Fontes remotas,
+Edge e Realtime não fazem parte da cobertura visual desse teste.
+
+Cenários: login e recarga, própria nota, adulteração de localStorage/objeto JS,
+troca de colaborador para monitor, lançamento pelo formulário com confirmação
+no banco, ADM/rebaixamento após recarga e usuário inativo. O modal de avaliação
+é fechado pelo botão real. Exceções JavaScript não tratadas reprovam a execução.
+
+A troca rápida de contas revelou que o login podia ser iniciado antes do término
+do signOut anterior. A correção bloqueia os campos durante a saída e impede a
+chamada de login nesse intervalo; libera os campos ao concluir, inclusive em
+caso de erro de rede. Teste unitário de concorrência incluído. Rollback: reverter
+somente esse trecho de `index.html` se necessário, preservando as proteções RLS.
+
+Conferência somente leitura em 29/09/2026: 52 policies (public + storage), 199
+colunas públicas (nome/tipo/nulabilidade) e 373 grants de anon/authenticated
+coincidem com a referência da auditoria. Não equivale a conferir integralmente
+constraints, funções, triggers e configurações Auth. PostgreSQL permanece 17.6;
+nenhuma nova policy farol_active_gate em produção. Buckets materiais/UPLOADS
+públicos e publicação Realtime sem tabelas permanecem como limitações.
+
+Resultado final desta etapa: [execução 36631929010](https://github.com/Relacionamento2026/Farol-Relacionamento/actions/runs/36631929010),
+commit `96168158a6e91b7519aee2dd98839ef034bb792e`: **20 cenários integrados
+aprovados**, incluindo os sete do navegador (21 testes na contagem Node com a
+suíte principal). Nenhuma falha ou exceção JavaScript não tratada. A gravação
+pelo formulário foi confirmada no banco. Os **23 testes locais** passaram com
+a correção da concorrência de logout. Instância e dados fictícios descartados.
+
+A primeira tentativa precisou reconhecer o modal de avaliação pelo botão real.
+A segunda expôs a troca de usuário antes da conclusão de signOut. Aguardar o
+signOut confirmou a causa; a correção na UI passou depois com a troca imediata,
+sem espera artificial no teste. Nenhuma mudança de layout foi feita.
