@@ -48,3 +48,16 @@ test('resposta de login pendente não reabre a tela após logout',async()=>{
  const ctx={supabaseClient:{removeAllChannels(){}},currentUser:null,currentRole:null,userProgress:{},allUsers:[],gestorDados:[],searchMaterialsCache:[],realtimeChannel:null,window:{},localStorage:{removeItem(){}},CONFIG:{STORAGE_USER:'re_user'},document:{getElementById(){return null}},FarolAccess:{readIdentity:()=>pending},showApp(){opens++},hideLoginScreen(){},navigateTo(){},loadProgressFromSupabase(){}};
  vm.createContext(ctx);vm.runInContext(src+'\n'+check,ctx);const run=ctx.checkAuthState();ctx.clearAuthenticatedState();finish({...profile,role:'admin'});assert.equal(await run,false);assert.equal(opens,0);
 });
+test('troca de usuário aguarda signOut; login direto é bloqueado enquanto pendente',async()=>{
+ const html=fs.readFileSync('index.html','utf8');
+ const src=html.slice(html.indexOf('async function loginUser()'),html.indexOf('// Validate URL-based access'));
+ let finish,signIns=0;const pending=new Promise(r=>finish=r);
+ const fields=Object.fromEntries(['userEmailInput','userPasswordInput','btnLoginUser'].map(id=>[id,{disabled:false,value:'sintético'}]));
+ const ctx={supabaseClient:{removeAllChannels(){},auth:{signOut:()=>pending,signInWithPassword(){signIns++;}}},currentUser:{},currentRole:'user',userProgress:{},allUsers:[],gestorDados:[],searchMaterialsCache:[],realtimeChannel:null,window:{},localStorage:{removeItem(){}},CONFIG:{STORAGE_USER:'re_user'},document:{getElementById:id=>fields[id]||null},showNotification(){}};
+ vm.createContext(ctx);vm.runInContext(src,ctx);
+ const closing=ctx.logout();
+ assert.ok(Object.values(fields).every(f=>f.disabled));
+ await ctx.loginUser();assert.equal(signIns,0);
+ finish({error:null});await closing;
+ assert.ok(Object.values(fields).every(f=>!f.disabled));
+});

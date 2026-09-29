@@ -3288,6 +3288,10 @@ function mostrarDefinirNovaSenha() {
 }
 
 async function loginUser() {
+    if (logoutInFlight) {
+        showNotification('Aguarde o encerramento da sessão para entrar novamente.', 'info');
+        return;
+    }
     // 1. Captura os campos de e-mail e senha do formulário do site
     const emailInput = document.getElementById('txtEmail') || document.getElementById('userEmailInput');
     const passwordInput = document.getElementById('txtPassword') || document.getElementById('userPasswordInput');
@@ -3372,6 +3376,9 @@ function clearAuthenticatedState() {
 async function logout() {
     if (logoutInFlight) return;
     logoutInFlight = true;
+    ['userEmailInput','userPasswordInput','txtEmail','txtPassword','btnLoginUser'].forEach(function(id) {
+        var el = document.getElementById(id); if (el) el.disabled = true;
+    });
     clearAuthenticatedState();
     try {
         if (supabaseClient) {
@@ -3383,6 +3390,9 @@ async function logout() {
         showNotification('A tela foi bloqueada, mas não foi possível confirmar o encerramento da sessão. Tente sair novamente quando a conexão voltar.', 'warning');
     } finally {
         logoutInFlight = false;
+        ['userEmailInput','userPasswordInput','txtEmail','txtPassword','btnLoginUser'].forEach(function(id) {
+            var el = document.getElementById(id); if (el) el.disabled = false;
+        });
     }
 }
 

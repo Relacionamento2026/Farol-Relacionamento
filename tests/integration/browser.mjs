@@ -45,7 +45,7 @@ export async function verifyBrowser(t,status,accounts,db){
    await page.locator('#userPasswordInput').fill(accounts[name].password);
    await page.locator('#btnLoginUser').click();
   };
-  const logout=async()=>{await page.locator('.logout-btn').click();await page.waitForFunction(()=>currentUser===null && !logoutInFlight);};
+  const logout=async()=>{await page.locator('.logout-btn').click();await page.waitForFunction(()=>currentUser===null);};
   const identity=()=>page.evaluate(()=>({id:currentUser?.id,role:currentRole,login:!document.getElementById('loginScreen').classList.contains('hidden'),admin:getComputedStyle(document.getElementById('adminMenuSection')).display,monitor:getComputedStyle(document.getElementById('avaliadorMenuSection')).display,page:document.querySelector('.page-section.active')?.id}));
   await page.goto('http://127.0.0.1:4173');
   await t.test('navegador: login pela tela e restauração após recarga com SDK real',async()=>{
