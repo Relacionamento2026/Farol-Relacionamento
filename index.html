@@ -2984,6 +2984,7 @@ img, iframe, video, svg { max-width: 100%; }
     </footer>
 
 <!-- JAVASCRIPT -->
+<script src="assets/access-control.js"></script>
 <script>
 // ==================== ÍCONES SVG (Fase 4) ====================
 var ICON_PATHS = {
@@ -3316,16 +3317,8 @@ async function loginUser() {
         
         if (error) throw error;
 
-        showNotification('Acesso autorizado! Entrando...', 'success');
-        
-        // 5. Aguarda um momento e chama a checagem de sessão que criamos
-        setTimeout(async () => {
-            await checkAuthState();
-            if (loginBtn) {
-                loginBtn.disabled = false;
-                loginBtn.innerHTML = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 8V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-2"/><path d="M15 12H4m0 0 3-3m-3 3 3 3"/></svg> Entrar';
-            }
-        }, 500);
+        if (!await checkAuthState()) throw new Error('Perfil sem acesso.');
+        if (loginBtn) { loginBtn.disabled = false; loginBtn.textContent = 'Entrar'; }
 
     } catch (err) {
         console.error('Erro ao efetuar login:', err.message);
@@ -3341,87 +3334,59 @@ async function loginUser() {
 /**
  * LOGOUT SEGURO: Encerra a sessão no servidor e limpa a tela
  */
-async function logoutUser() {
-    try {
-        if (supabaseClient) {
-            await supabaseClient.auth.signOut();
-        }
-    } catch (e) {
-        console.error('Erro ao sair da sessão:', e);
-    } finally {
-        // Reseta os estados locais na memória do navegador
-        currentUser = null;
-        currentUserProfile = null;
-        currentRole = null;
-        
-        // Limpa os campos visuais do formulário de login
-        const emailInput = document.getElementById('txtEmail') || document.getElementById('userEmailInput');
-        const passwordInput = document.getElementById('txtPassword') || document.getElementById('userPasswordInput');
-        if (emailInput) emailInput.value = '';
-        if (passwordInput) passwordInput.value = '';
+let authEpoch = 0;
+let authCheckInFlight = null;
+let logoutInFlight = false;
 
-        // Exibe novamente a tela de login
-        exibirPainelLogin(true);
-        showNotification('Sessão encerrada com segurança.', 'info');
-    }
-}
-
-// [loginAdmin removida — login unificado em loginUser, formulário de admin removido da UI]
-
-async function logout() {
-    // Sign out from Supabase Auth
-    try {
-        if (supabaseClient) {
-            await supabaseClient.auth.signOut();
-        }
-    } catch (e) {
-        console.warn('Erro ao fazer signOut do Supabase:', e);
-    }
-
-    // Clear session
-    pararRealtime();
+function clearAuthenticatedState() {
+    authEpoch++;
+    authCheckInFlight = null;
     currentUser = null;
     currentRole = null;
     userProgress = {};
-
-    // Clear localStorage
+    allUsers = [];
+    gestorDados = [];
+    searchMaterialsCache = [];
+    if (supabaseClient) supabaseClient.removeAllChannels();
+    realtimeChannel = null;
+    ['av5Lancamentos','av5ColabData','_faqCache','_admCache','_treinamentosCache',
+     '_treinamentosAdminCache'].forEach(function(key) { window[key] = []; });
+    window.gestorEquipeMap = {};
+    window.gestorCargoMap = {};
     localStorage.removeItem(CONFIG.STORAGE_USER);
-
-    // Reset UI
-    document.getElementById('loginScreen').classList.remove('hidden');
-    document.getElementById('mainContent').style.display = 'none';
-    document.getElementById('userInfoPanel').style.display = 'none';
-    document.getElementById('adminMenuSection').style.display = 'none';
-
-    // Reset forms
-    document.getElementById('userNameInput').value = '';
-    document.getElementById('userEmailInput').value = '';
-    document.getElementById('userPasswordInput').value = '';
-    document.getElementById('adminUserInput').value = '';
-    document.getElementById('adminPassInput').value = '';
-
-    // Reset buttons
-    document.getElementById('btnLoginUser').disabled = false;
-    document.getElementById('btnLoginUser').innerHTML = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 8V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-2"/><path d="M15 12H4m0 0 3-3m-3 3 3 3"/></svg> Acessar minha trilha';
-    document.getElementById('btnLoginAdmin').disabled = false;
-    document.getElementById('btnLoginAdmin').innerHTML = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="9.5" rx="1.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg> Acessar painel ADM';
-
-    // Hide errors
-    hideError('user');
-    hideError('admin');
-    hideSuccess('user');
-    hideSuccess('admin');
-
-    // Reset nav
-    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-    document.querySelector('[data-page="dashboard"]').classList.add('active');
-
-    // Reset pages
-    document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
-    document.getElementById('page-dashboard').classList.add('active');
-
-    showNotification('Você saiu da plataforma', 'info');
+    localStorage.removeItem('undefined');
+    ['mainContent','userInfoPanel','adminMenuSection','avaliadorMenuSection',
+     'diretoraMenuSection'].forEach(function(id) {
+        var el = document.getElementById(id); if (el) el.style.display = 'none';
+    });
+    var login = document.getElementById('loginScreen');
+    if (login) login.classList.remove('hidden');
+    ['userPasswordInput','txtPassword'].forEach(function(id) {
+        var el = document.getElementById(id); if (el) el.value = '';
+    });
+    ['av5-lista','av5-colab-list','searchResults','dash-search-results'].forEach(function(id) {
+        var el = document.getElementById(id); if (el) el.innerHTML = '';
+    });
 }
+
+async function logout() {
+    if (logoutInFlight) return;
+    logoutInFlight = true;
+    clearAuthenticatedState();
+    try {
+        if (supabaseClient) {
+            const result = await supabaseClient.auth.signOut();
+            if (result.error) throw result.error;
+        }
+        showNotification('Você saiu da plataforma.', 'info');
+    } catch (error) {
+        showNotification('A tela foi bloqueada, mas não foi possível confirmar o encerramento da sessão. Tente sair novamente quando a conexão voltar.', 'warning');
+    } finally {
+        logoutInFlight = false;
+    }
+}
+
+async function logoutUser() { return logout(); }
 
 // Validate URL-based access attempts to onboarding modules
 function validateUrlAccess() {
@@ -3442,103 +3407,44 @@ function validateUrlAccess() {
 }
 
 async function checkAuthState() {
-    // First try Supabase Auth session
-    try {
-        if (!supabaseClient) initSupabase();
-        if (supabaseClient) {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-
-            if (session && session.user) {
-                // Get user profile from Supabase
-                const profile = await getUserProfile(session.user.id);
-
-                if (profile) {
-                    currentUser = {
-                        name: profile.nome || profile.name || session.user.user_metadata?.name || 'Colaborador',
-                        email: session.user.email,
-                        role: profile.role || 'user',
-                        id: session.user.id,
-                        mustChangePassword: profile.must_change_password === true,
-                        avaliado: profile.avaliado === true,
-                        departamento: profile.departamento || '',
-                        gestor_email: profile.gestor_email || '',
-                        loginTime: new Date().toISOString()
-                    };
-                    currentRole = currentUser.role;
-                } else {
-                    // Fallback if no profile exists
-                    currentUser = {
-                        name: session.user.user_metadata?.name || 'Colaborador',
-                        email: session.user.email,
-                        role: 'user',
-                        id: session.user.id,
-                        loginTime: new Date().toISOString()
-                    };
-                    currentRole = 'user';
-                }
-
-                // Progresso carregado exclusivamente do Supabase (via loadProgressFromSupabase)
+    if (logoutInFlight) return false;
+    if (authCheckInFlight) return authCheckInFlight;
+    const epoch = authEpoch;
+    const task = (async function() {
+        try {
+            if (!supabaseClient) initSupabase();
+            const identity = await FarolAccess.readIdentity(supabaseClient);
+            if (epoch !== authEpoch || logoutInFlight) return false;
+            const unchanged = currentUser && currentUser.id === identity.id &&
+                currentRole === identity.role && currentUser.avaliado === identity.avaliado &&
+                currentUser.mustChangePassword === identity.mustChangePassword;
+            if (currentUser && !unchanged) clearAuthenticatedState();
+            currentUser = identity;
+            currentRole = identity.role;
+            if (!unchanged) {
                 hideLoginScreen();
                 showApp();
-                validateUrlAccess();
-                // PRIMEIRO ACESSO: se precisa trocar a senha, bloqueia o app até trocar.
-                if (currentUser.mustChangePassword) {
+                if (identity.mustChangePassword) {
                     forcarTrocaSenhaPrimeiroAcesso();
-                    return;
-                }
-                if (currentRole === 'admin') {
-                    updateAdminDashboard();
-                } else if (currentRole === 'diretora') {
-                    navigateTo('executivo');
-                } else if (['gerente','coordenadora','lider',
-                    'admin-juridico-contratos','admin-juridico-credito'].indexOf(currentRole) !== -1) {
-                    navigateTo('gestor');
+                } else if (currentRole === 'admin') {
+                    navigateTo('admin-dashboard');
                 } else if (currentRole === 'avaliador') {
                     navigateTo('avaliador-5e');
+                    loadProgressFromSupabase();
                 } else {
-                    updateDashboard();
+                    navigateTo('dashboard');
                     loadProgressFromSupabase();
                 }
-                return;
             }
+            return true;
+        } catch (error) {
+            if (epoch === authEpoch) clearAuthenticatedState();
+            return false;
         }
-    } catch (e) {
-        console.warn('Supabase session check failed:', e);
-    }
-
-    // Fallback: Check localStorage for backward compatibility
-    const savedAdmin = localStorage.getItem(CONFIG.STORAGE_ADMIN);
-    const savedUser = localStorage.getItem(CONFIG.STORAGE_USER);
-
-    if (savedAdmin) {
-        try {
-            const admin = JSON.parse(savedAdmin);
-            currentUser = admin;
-            currentRole = 'admin';
-            hideLoginScreen();
-            showApp();
-            validateUrlAccess();
-            updateAdminDashboard();
-        } catch(e) {
-            localStorage.removeItem(CONFIG.STORAGE_ADMIN);
-        }
-    } else if (savedUser) {
-        try {
-            const user = JSON.parse(savedUser);
-            if (user.email && user.email.endsWith(CONFIG.ALLOWED_DOMAIN)) {
-                currentUser = user;
-                currentRole = 'user';
-                // Progresso carregado do Supabase por loadProgressFromSupabase()
-                hideLoginScreen();
-                showApp();
-                updateDashboard();
-            } else {
-                localStorage.removeItem(CONFIG.STORAGE_USER);
-            }
-        } catch(e) {
-            localStorage.removeItem(CONFIG.STORAGE_USER);
-        }
-    }
+    })();
+    authCheckInFlight = task;
+    try { return await task; }
+    finally { if (authCheckInFlight === task) authCheckInFlight = null; }
 }
 
 // ==================== UI HELPERS ====================
@@ -3593,124 +3499,25 @@ function showApp() {
         var mainMenu = document.getElementById('mainMenuSection');
         var adminMenu = document.getElementById('adminMenuSection');
         var avalMenu = document.getElementById('avaliadorMenuSection');
-        // ── Labels de role ────────────────────────────────────────
-        var _rLabels = {
-            'admin': 'Administrador', 'avaliador': 'Avaliador',
-            'diretora': 'Diretora', 'gerente': 'Gerente',
-            'coordenadora': 'Coordenadora', 'lider': 'Líder de Equipe',
-            'admin-juridico-contratos': 'Gestora Jurídico',
-            'admin-juridico-credito': 'Gestora Jurídico',
-            'admin-onboarding': 'Adm. Onboarding',
-            'gestor': 'Gestor', 'user': 'Colaborador'
-        };
-
-        // ── Helper: oculta todos os menus antes de montar ─────────
-        function ocultarTodosMenus() {
-            [mainMenu, adminMenu, avalMenu].forEach(function(m){ if(m) m.style.display='none'; });
-            ['nav-gestor','nav-cinco-estrelas','nav-central-conhecimento',
-             'nav-admin-materiais'].forEach(function(id){
-                var el=document.getElementById(id); if(el) el.style.display='none';
-            });
-        }
-
-        ocultarTodosMenus();
-
-        roleEl.textContent = _rLabels[currentRole] || 'Colaborador';
-
-        // ── ADMIN ─────────────────────────────────────────────────
+        [mainMenu, adminMenu, avalMenu, document.getElementById('diretoraMenuSection')]
+            .forEach(function(el) { if (el) el.style.display = 'none'; });
+        ['nav-gestor','nav-cinco-estrelas','nav-central-conhecimento','nav-admin-materiais']
+            .forEach(function(id) { var el=document.getElementById(id); if(el) el.style.display='none'; });
+        if (mainMenu) mainMenu.style.display = 'block';
+        roleEl.textContent = currentRole === 'admin' ? 'Administrador' : currentRole === 'avaliador' ? 'Monitor' : 'Colaborador';
+        roleEl.className = 'user-role ' + (currentRole === 'user' ? 'user' : 'admin');
         if (currentRole === 'admin') {
-            roleEl.className = 'user-role admin';
-            if (mainMenu) mainMenu.style.display = 'block';
             if (adminMenu) adminMenu.style.display = 'block';
-            // Admin vê tudo no menu principal
-            ['nav-gestor','nav-cinco-estrelas','nav-admin-treinamentos-unic'].forEach(function(id){
+            if (avalMenu) avalMenu.style.display = 'block';
+            ['nav-gestor','nav-admin-materiais','nav-admin-treinamentos-unic'].forEach(function(id) {
                 var el=document.getElementById(id); if(el) el.style.display='flex';
             });
-
-        // ── AVALIADOR ─────────────────────────────────────────────
-        } else if (currentRole === 'avaliador') {
-            roleEl.className = 'user-role admin';
-            // Só menu de avaliação (perfil + lançar notas + trilhas + faq)
-            if (avalMenu) avalMenu.style.display = 'block';
-
-        // ── DIRETORA ──────────────────────────────────────────────
-        } else if (currentRole === 'diretora') {
-            // Diretora: APENAS painel executivo — sem trilhas, FAQ, certificados
-            roleEl.className = 'user-role admin';
-            // Oculta o menu principal (trilhas, faq, cert) — não é colaboradora
-            if (mainMenu) mainMenu.style.display = 'none';
-            if (adminMenu) adminMenu.style.display = 'none';
-            if (avalMenu) avalMenu.style.display = 'none';
-            // Cria menu exclusivo da diretora dinamicamente
-            var dirMenu = document.getElementById('diretoraMenuSection');
-            if (!dirMenu) {
-                dirMenu = document.createElement('div');
-                dirMenu.id = 'diretoraMenuSection';
-                dirMenu.className = 'nav-section';
-                dirMenu.innerHTML = '<div class="nav-section-title">Diretoria</div>'
-                    + '<div class="nav-item active" data-page="executivo" onclick="navigateTo(&quot;executivo&quot;)" role="button" tabindex="0" onkeydown="if(event.key===&quot;Enter&quot;||event.key===&quot; &quot;){event.preventDefault();navigateTo(&quot;executivo&quot;)}" id="nav-dir-painel"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="1"/><path d="M9 7h1.2M13.8 7H15M9 11h1.2M13.8 11H15M9 15h1.2M13.8 15H15"/><path d="M10 21v-4h4v4"/></svg> Visão Executiva</div>'
-                    /* Gerenciar Usuários removido da Diretora — responsabilidade do admin técnico */
-                    + '<div class="nav-item" data-page="user-profile" onclick="navigateTo(&quot;user-profile&quot;)" role="button" tabindex="0" onkeydown="if(event.key===&quot;Enter&quot;||event.key===&quot; &quot;){event.preventDefault();navigateTo(&quot;user-profile&quot;)}" id="nav-dir-perfil"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="10" r="2.6"/><path d="M6.3 18.2c1.1-2.5 3.2-4 5.7-4s4.6 1.5 5.7 4"/></svg> Meu Perfil</div>';
-                var nav = document.querySelector('nav .sidebar-nav') || document.querySelector('nav');
-                if (nav) nav.appendChild(dirMenu);
-            }
-            dirMenu.style.display = 'block';
-
-        // ── GERENTE ───────────────────────────────────────────────
-        } else if (currentRole === 'gerente') {
-            roleEl.className = 'user-role admin';
-            if (mainMenu) mainMenu.style.display = 'block';
-            var gEl = document.getElementById('nav-gestor');
-            if (gEl) { gEl.style.display = 'flex'; gEl.textContent = ''; gEl.innerHTML = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8.5" cy="8" r="3"/><circle cx="16" cy="9" r="2.4"/><path d="M2.8 19.5c.9-3.2 3.1-5 5.7-5s4.8 1.8 5.7 5"/><path d="M15 15c2.1.2 3.7 1.8 4.4 4.3"/></svg> Painel da Gerência'; gEl.setAttribute('onclick',"navigateTo('gestor')"); }
-
-        // ── COORDENADORA ──────────────────────────────────────────
-        } else if (currentRole === 'coordenadora') {
-            roleEl.className = 'user-role admin';
-            if (mainMenu) mainMenu.style.display = 'block';
-            var gEl = document.getElementById('nav-gestor');
-            if (gEl) { gEl.style.display = 'flex'; gEl.innerHTML = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8.5" cy="8" r="3"/><circle cx="16" cy="9" r="2.4"/><path d="M2.8 19.5c.9-3.2 3.1-5 5.7-5s4.8 1.8 5.7 5"/><path d="M15 15c2.1.2 3.7 1.8 4.4 4.3"/></svg> Minha Equipe'; gEl.setAttribute('onclick',"navigateTo('gestor')"); }
-
-        // ── LÍDER ─────────────────────────────────────────────────
-        } else if (currentRole === 'lider') {
-            roleEl.className = 'user-role admin';
-            if (mainMenu) mainMenu.style.display = 'block';
-            var gEl = document.getElementById('nav-gestor');
-            if (gEl) { gEl.style.display = 'flex'; gEl.innerHTML = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8.5" cy="8" r="3"/><circle cx="16" cy="9" r="2.4"/><path d="M2.8 19.5c.9-3.2 3.1-5 5.7-5s4.8 1.8 5.7 5"/><path d="M15 15c2.1.2 3.7 1.8 4.4 4.3"/></svg> Minha Equipe'; gEl.setAttribute('onclick',"navigateTo('gestor')"); }
-
-        // ── GESTORAS DO JURÍDICO ──────────────────────────────────
-        } else if (currentRole === 'admin-juridico-contratos' || currentRole === 'admin-juridico-credito') {
-            roleEl.className = 'user-role admin';
-            if (mainMenu) mainMenu.style.display = 'block';
-            // Veem trilha jurídico + painel da equipe
-            var gEl = document.getElementById('nav-gestor');
-            if (gEl) { gEl.style.display = 'flex'; gEl.innerHTML = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8.5" cy="8" r="3"/><circle cx="16" cy="9" r="2.4"/><path d="M2.8 19.5c.9-3.2 3.1-5 5.7-5s4.8 1.8 5.7 5"/><path d="M15 15c2.1.2 3.7 1.8 4.4 4.3"/></svg> Minha Equipe'; gEl.setAttribute('onclick',"navigateTo('gestor')"); }
-            if (adminMenu) {
-                ['admin-dashboard','admin-content','admin-users','admin-treinamentos-unic'].forEach(function(pid){
-                    var el=adminMenu.querySelector('[data-page="'+pid+'"]'); if(el) el.style.display='none';
-                });
-                adminMenu.style.display = 'block';
-            }
-
-        // ── SUB-ADMIN DE CONTEÚDO ─────────────────────────────────
-        } else if (currentRole && currentRole.startsWith('admin-')) {
-            roleEl.className = 'user-role admin';
-            if (mainMenu) mainMenu.style.display = 'block';
-            if (adminMenu) {
-                ['admin-dashboard','admin-content','admin-users','admin-treinamentos-unic'].forEach(function(pid){
-                    var el=adminMenu.querySelector('[data-page="'+pid+'"]'); if(el) el.style.display='none';
-                });
-                adminMenu.style.display = 'block';
-            }
-
-        // ── COLABORADOR (user) ────────────────────────────────────
-        } else {
-            roleEl.className = 'user-role user';
-            if (mainMenu) mainMenu.style.display = 'block';
-            // 5 Estrelas só para avaliados
-            if (currentUser && currentUser.avaliado) {
-                var ceEl = document.getElementById('nav-cinco-estrelas');
-                if (ceEl) ceEl.style.display = 'flex';
-            }
+        } else if (currentRole === 'avaliador' && avalMenu) {
+            avalMenu.style.display = 'block';
+        }
+        if (currentUser.avaliado || currentRole === 'admin') {
+            var ownNotes = document.getElementById('nav-cinco-estrelas');
+            if (ownNotes) ownNotes.style.display = 'flex';
         }
         // Exibe a foto de perfil salva (Supabase Storage) no menu lateral
         loadProfilePhoto();
@@ -3995,48 +3802,8 @@ function navigateTo(page) {
         return;
     }
 
-    // Admin route protection
-    var _isSubAdmin = currentRole && currentRole.startsWith('admin-');
-    const adminPages = ['admin-dashboard', 'admin-content', 'admin-users', 'admin-treinamentos-unic'];
-    if (adminPages.includes(page) && currentRole !== 'admin') {
-        navigateTo('dashboard');
-        return;
-    }
-    // Sub-admin pode acessar Gerenciar Materiais
-    if (page === 'admin-materiais' && currentRole !== 'admin' && !_isSubAdmin) {
-        navigateTo('dashboard');
-        return;
-    }
-
-    // Avaliador: perfil exclusivo de avaliação. Só pode acessar a tela de
-    // lançamento e o próprio perfil; qualquer outra página é bloqueada.
-    if (currentRole === 'avaliador') {
-        const avaliadorPermitido = ['avaliador-5e', 'user-profile', 'respostas-faq', 'faq', 'consultar-respostas', 'administradoras', 'trilha-onboarding', 'dashboard'];
-        if (!avaliadorPermitido.includes(page) && !page.startsWith('mod-')) {
-            showNotification('Este item não está disponível no seu perfil.', 'warning');
-            return;
-        }
-    }
-
-    // Gestor/diretora: acesso ao painel de gestão
-    // Diretora: acesso restrito a painel executivo, usuários e perfil
-    if (currentRole === 'diretora') {
-        var paginasDiretora = ['executivo','gestor','user-profile'];
-        if (paginasDiretora.indexOf(page) === -1) {
-            navigateTo('gestor');
-            return;
-        }
-    }
-
-    // Roles com acesso ao painel de gestão
-    var _rolesGestor = ['admin','diretora','gerente','coordenadora','lider',
-        'admin-juridico-contratos','admin-juridico-credito','gestor'];
-    if (page === 'executivo' && currentRole !== 'diretora' && currentRole !== 'admin') {
-        navigateTo('dashboard');
-        return;
-    }
-    if (page === 'gestor' && _rolesGestor.indexOf(currentRole) === -1) {
-        navigateTo('dashboard');
+    if (!FarolAccess.canOpen(currentRole, page)) {
+        showNotification('Este item não está disponível no seu perfil.', 'warning');
         return;
     }
 
@@ -4285,7 +4052,7 @@ function atalhoAdmin(icone, titulo, page) {
 function updateDashboard() {
     if (!currentUser) return;
     // ADMIN e perfis não-colaborador: dashboard não tem cards de faixa nem conquistas
-    if (currentRole !== 'user') {
+    if (currentRole === 'admin') {
         var sk = document.getElementById('zona2-skeleton');
         if (sk) sk.style.display = 'none';
         var z2 = document.getElementById('dashboard-zona2');
@@ -5606,6 +5373,7 @@ function removeFile(id) {
 // ==================== SUPABASE REAL UPLOAD ====================
 
 function initSupabase() {
+    if (supabaseClient) return true;
     if (typeof supabase !== 'undefined' && supabase.createClient) {
         try {
             supabaseClient = supabase.createClient(SUPABASE_CONFIG.URL, SUPABASE_CONFIG.ANON_KEY);
@@ -7171,9 +6939,12 @@ function setupEventListeners() {
             if (supabaseClient) {
                 supabaseClient.auth.onAuthStateChange((event, session) => {
                     if (event === 'SIGNED_OUT') {
-                        if (currentUser) logout();
-                    } else if (event === 'SIGNED_IN' && session) {
-                        checkAuthState();
+                        clearAuthenticatedState();
+                    } else if (['SIGNED_IN','TOKEN_REFRESHED','USER_UPDATED'].includes(event) && session) {
+                        // Fora do callback do SDK: evita reentrada no lock do Auth.
+                        setTimeout(function() { checkAuthState(); }, 0);
+                    } else if (event === 'PASSWORD_RECOVERY') {
+                        setTimeout(mostrarDefinirNovaSenha, 0);
                     }
                 });
             }
@@ -7683,7 +7454,7 @@ async function gestorCarregarDados() {
         // Buscar colaboradores da equipe
         var colaboradoresDaEquipe = null;
         if (_equipeFiltro || _deptsFiltro) {
-            var qProf = supabaseClient.from('profiles').select('nome, departamento, updated_at, ativo').eq('role','user');
+            var qProf = supabaseClient.from('profiles').select('nome, departamento, atualizado_em, ativo').eq('role','user');
             if (_equipeFiltro) qProf = qProf.eq('gestor_email', _equipeFiltro);
             if (_deptsFiltro) qProf = qProf.in('departamento', _deptsFiltro);
             var resEquipe = await qProf;
@@ -7691,15 +7462,15 @@ async function gestorCarregarDados() {
                 colaboradoresDaEquipe = resEquipe.data;
                 window.gestorEquipeMap = {};
                 resEquipe.data.forEach(function(p){
-                    window.gestorEquipeMap[p.nome] = { dept:p.departamento, acesso:p.updated_at, ativo:p.ativo };
+                    window.gestorEquipeMap[p.nome] = { dept:p.departamento, acesso:p.atualizado_em, ativo:p.ativo };
                 });
             }
         } else {
-            var rAll = await supabaseClient.from('profiles').select('nome, departamento, gestor_email, updated_at, ativo').eq('role','user');
+            var rAll = await supabaseClient.from('profiles').select('nome, departamento, gestor_email, atualizado_em, ativo').eq('role','user');
             if (!rAll.error && rAll.data) {
                 window.gestorEquipeMap = {};
                 rAll.data.forEach(function(p){
-                    window.gestorEquipeMap[p.nome] = { dept:p.departamento, gestor:p.gestor_email, acesso:p.updated_at, ativo:p.ativo };
+                    window.gestorEquipeMap[p.nome] = { dept:p.departamento, gestor:p.gestor_email, acesso:p.atualizado_em, ativo:p.ativo };
                 });
             }
         }
@@ -7708,6 +7479,9 @@ async function gestorCarregarDados() {
         var queryAv = supabaseClient.from('avaliacoes_mensais')
             .select('colaborador_id, colaborador_nome, competencia, nota_monitoria, nota_cliente, nota_final, atendimentos_monitorados')
             .order('competencia', { ascending: true });
+        if ((_equipeFiltro || _deptsFiltro) && (!colaboradoresDaEquipe || !colaboradoresDaEquipe.length)) {
+            gestorDados = []; gestorMostrarErro('Equipe indisponível ou vazia.'); return;
+        }
         if (colaboradoresDaEquipe && colaboradoresDaEquipe.length > 0) {
             queryAv = queryAv.in('colaborador_nome', colaboradoresDaEquipe.map(function(p){return p.nome;}));
         }
@@ -8597,7 +8371,7 @@ function gestorRenderCardsEquipe(dadosMes, tendMap) {
 // ==================== STATUS DO MÊS PARA AVALIADOR ====================
 
 async function avStatusMes() {
-    if (!supabaseClient || currentRole !== 'avaliador') return;
+    if (!supabaseClient || !['avaliador','admin'].includes(currentRole)) return;
     try {
         // Mês atual
         var hoje = new Date();
@@ -8605,7 +8379,7 @@ async function avStatusMes() {
 
         // Total de avaliados
         var rTotal = await supabaseClient.from('profiles')
-            .select('nome').eq('role','user').eq('avaliado',true).eq('ativo','ativo');
+            .select('nome').eq('avaliado',true).eq('ativo','ativo');
         var total = rTotal.data ? rTotal.data.length : 0;
         var todosNomes = rTotal.data ? rTotal.data.map(function(p){return p.nome;}) : [];
 
@@ -9253,6 +9027,7 @@ function fillProfileDataForm(dados) {
     const email = document.getElementById('profileEditEmail');
     const cargo = document.getElementById('profileEditCargo');
     const dept = document.getElementById('profileEditDepartamento');
+    if (dept) dept.disabled = true;
     if (nome) nome.value = dados.nome || '';
     if (email) email.value = dados.email || '';
     if (cargo) cargo.value = dados.cargo || '';
@@ -9346,7 +9121,7 @@ async function saveProfileData() {
 
         // Detecta a convenção de coluna do nome usada na tabela (name ou nome)
         const atual = await getUserProfile(currentUser.id);
-        const updateObj = { cargo: cargo, departamento: departamento };
+        const updateObj = { cargo: cargo };
         if (atual && Object.prototype.hasOwnProperty.call(atual, 'nome')) updateObj.nome = nome;
         else updateObj.name = nome;
 
@@ -10707,7 +10482,7 @@ function initAvaliador5E(){
 window.av5ColabData = [];
 window.av5ColabAberto = false;
 
-// Carrega colaboradores via RPC SECURITY DEFINER — bypassa RLS completamente
+// A RPC valida a autorização no servidor; a query de reserva também depende de RLS.
 async function av5CarregarColaboradores(){
     var lista = document.getElementById('av5-colab-list');
     if(!lista) return;
@@ -10719,7 +10494,7 @@ async function av5CarregarColaboradores(){
         var dados = null;
         var erroMsg = '';
 
-        // Tentativa 1: RPC SECURITY DEFINER (bypassa RLS) — retorna só avaliados
+        // Tentativa 1: RPC com autorização no servidor — retorna o grupo permitido
         var r1 = await supabaseClient.rpc('listar_colaboradores_avaliados');
         if (!r1.error && r1.data && r1.data.length > 0) {
             dados = r1.data;
@@ -10728,7 +10503,6 @@ async function av5CarregarColaboradores(){
             // Tentativa 2: query direta — só avaliados ativos
             var r2 = await supabaseClient.from('profiles')
                 .select('id, email, nome, role')
-                .eq('role', 'user')
                 .eq('avaliado', true)
                 .eq('ativo', 'ativo')
                 .order('nome', { ascending: true });
@@ -11101,27 +10875,10 @@ function deleteFile(fileName) {
 
 // ==================== CONFIGURATION PANEL ====================
 function showSupabaseConfig() {
-    const url = prompt('URL do projeto Supabase:', SUPABASE_CONFIG.URL);
-    const key = prompt('Anon Key do Supabase:', SUPABASE_CONFIG.ANON_KEY);
-
-    if (url && key) {
-        SUPABASE_CONFIG.URL = url;
-        SUPABASE_CONFIG.ANON_KEY = key;
-        localStorage.setItem('re_supabase_config', JSON.stringify(SUPABASE_CONFIG));
-        initSupabase();
-        showNotification('Configuração salva!', 'success');
-    }
+    showNotification('Configuração gerenciada pela implantação.', 'info');
 }
-
-// Load saved config on startup
-const savedConfig = localStorage.getItem('re_supabase_config');
-if (savedConfig) {
-    try {
-        Object.assign(SUPABASE_CONFIG, JSON.parse(savedConfig));
-    } catch(e) {}
-}
-
-
+// Preferências locais nunca alteram o destino da autenticação.
+localStorage.removeItem('re_supabase_config');
 
 // ==================== FAQ DYNAMIC FUNCTIONS ====================
 // Table: "Faq" with columns: pergunta, resposta, criado_em

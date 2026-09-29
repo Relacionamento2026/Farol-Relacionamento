@@ -1,78 +1,17 @@
-name: Validar sintaxe antes de publicar
-
-# Roda automaticamente sempre que alguém sobe uma mudança no index.html,
-# seja direto na main ou num Pull Request. NÃO substitui o workflow que já
-# publica o site (esse aqui só barra a publicação se o código estiver
-# quebrado — se tudo estiver certo, não muda em nada o que já acontece hoje).
+name: Validar segurança e sintaxe
 on:
   push:
     branches: [main]
-    paths:
-      - 'index.html'
   pull_request:
     branches: [main]
-    paths:
-      - 'index.html'
-
 jobs:
-  validar-sintaxe:
+  security-tests:
     runs-on: ubuntu-latest
     steps:
-      - name: Baixar o código do repositório
-        uses: actions/checkout@v4
-
-      - name: Configurar Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-
-      - name: Extrair e validar o JavaScript do index.html
-        run: |
-          python3 - <<'PYEOF'
-          import re, sys
-
-          with open("index.html", encoding="utf-8") as f:
-              conteudo = f.read()
-
-          # Mesma técnica usada durante todo o desenvolvimento: extrai o
-          # bloco <script> (sem "src=", ou seja, o JS embutido no arquivo)
-          # e valida a sintaxe dele isoladamente.
-          blocos = re.findall(
-              r'<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>',
-              conteudo,
-              re.DOTALL,
-          )
-
-          if not blocos:
-              print("::warning::Nenhum bloco <script> embutido encontrado em index.html — nada pra validar.")
-              sys.exit(0)
-
-          with open("_farol_script_check.js", "w", encoding="utf-8") as f:
-              f.write(blocos[0])
-
-          print(f"Bloco de script extraído: {len(blocos[0])} caracteres")
-          PYEOF
-
-      - name: Rodar "node --check" no JavaScript extraído
-        run: node --check _farol_script_check.js
-
-      - name: Checar se tags <div> estão balanceadas
-        run: |
-          python3 - <<'PYEOF'
-          import sys
-
-          with open("index.html", encoding="utf-8") as f:
-              conteudo = f.read()
-
-          abertas = conteudo.count("<div")
-          fechadas = conteudo.count("</div>")
-
-          print(f"<div>: {abertas} abertas / {fechadas} fechadas")
-
-          if abertas != fechadas:
-              print(f"::error::Tags <div> desbalanceadas — {abertas} abertas contra {fechadas} fechadas. Isso costuma quebrar o layout da página inteira.")
-              sys.exit(1)
-          PYEOF
-
-      - name: Tudo certo
-        run: echo "✅ Sintaxe validada — pode publicar com segurança."
+          node-version: '24'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm test
