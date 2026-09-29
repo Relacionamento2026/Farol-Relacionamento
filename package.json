@@ -6,7 +6,10 @@
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.8",
+    "@supabase/supabase-js": "2.39.0",
+    "chart.js": "4.4.0",
     "pg": "8.23.0",
+    "playwright": "1.63.0",
     "supabase": "2.118.0"
   }
 }

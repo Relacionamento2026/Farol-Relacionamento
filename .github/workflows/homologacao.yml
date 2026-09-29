@@ -16,6 +16,8 @@ jobs:
         with:
           node-version: '24'
       - run: npm ci
+      - name: Install isolated Chromium
+        run: npx --no-install playwright install --with-deps chromium
       - run: node tests/integration/prepare.mjs
       - name: Start disposable local services (no cloud login/link)
         run: npx --no-install supabase start --workdir test-results/integration -x studio,imgproxy,logflare,vector,supavisor,edge-runtime,realtime,postgres-meta > test-results/integration/start.log

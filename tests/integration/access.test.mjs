@@ -4,6 +4,7 @@ import {readFileSync,readdirSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
 import {randomBytes} from 'node:crypto';
 import pg from 'pg';
+import {verifyBrowser} from './browser.mjs';
 
 // Only locally generated credentials; never accepts environment-provided remote URLs.
 const dir='test-results/integration';
@@ -54,7 +55,7 @@ test('Supabase local real: Auth, REST, RLS, Storage e rollback',async t=>{
    const id=created.id || created.user?.id;assert.ok(id);
    await db.query('INSERT INTO profiles(id,nome,email,role,ativo,avaliado) VALUES($1,$2,$3,$4,$5,$6)',[id,'Sintético',email,role,active,evaluated]);
    const session=ok(await request('/auth/v1/token?grant_type=password',null,'POST',{email,password}));
-   assert.ok(session.access_token);accounts[name]={id,token:session.access_token,refresh:session.refresh_token};
+   assert.ok(session.access_token);accounts[name]={id,token:session.access_token,refresh:session.refresh_token,password};
   }
   for(const name of ['own','other','outside']){const note=makeNote(accounts[name].id,'2026-09');await db.query('INSERT INTO avaliacoes_mensais(colaborador_id,colaborador_nome,competencia,nota_monitoria,nota_cliente,nota_final,classificacao) VALUES($1,$2,$3,4,4,4,$4)',[note.colaborador_id,note.colaborador_nome,note.competencia,note.classificacao]);}
   await db.query("NOTIFY pgrst, 'reload schema'");
@@ -126,6 +127,7 @@ test('Supabase local real: Auth, REST, RLS, Storage e rollback',async t=>{
    ok(await request('/auth/v1/logout',accounts.other.token,'POST'));
    denied(await request('/auth/v1/token?grant_type=refresh_token',null,'POST',{refresh_token:accounts.other.refresh}));
   });
+  await verifyBrowser(t,status,accounts,db);
   await t.test('rollback restaura policies anteriores e preserva notas',async()=>{
    const before=(await db.query('SELECT count(*)::int n FROM avaliacoes_mensais')).rows[0].n;
    await db.query("SET farol.allow_unsafe_rollback='reviewed'");
