@@ -128,6 +128,39 @@ test('Supabase local real: Auth, REST, RLS, Storage e rollback',async t=>{
    denied(await request('/auth/v1/token?grant_type=refresh_token',null,'POST',{refresh_token:accounts.other.refresh}));
   });
   await verifyBrowser(t,status,accounts,db);
+  const edge='/functions/v1/farol-validation';
+  // Browser logout revokes sessions, so acquire fresh local sessions for this phase.
+  for(const who of ['own','inactive']){
+   const session=ok(await request('/auth/v1/token?grant_type=password',null,'POST',{email:who+'@example.test',password:accounts[who].password}));
+   accounts[who].token=session.access_token;
+  }
+  let edgeReady=false;
+  for(let n=0;n<90;n++){
+   try{const r=await request(edge,accounts.own.token,'POST',{pergunta:'ready',base:''});if(r.status===200){edgeReady=true;break;}}catch{}
+   await new Promise(r=>setTimeout(r,1000));
+  }
+  assert.ok(edgeReady,'Local Edge Runtime must start and execute actual handler');
+  async function edgeCall(token,body,method='POST'){
+   const headers={apikey:status.ANON_KEY,'Content-Type':'application/json'};
+   if(token)headers.Authorization='Bearer '+token;
+   const r=await fetch(status.API_URL+edge,{method,headers,body:method==='OPTIONS'?undefined:JSON.stringify(body),redirect:'error',signal:AbortSignal.timeout(10000)});
+   const text=await r.text();let data;try{data=JSON.parse(text);}catch{data=text;}
+   return {status:r.status,data,calls:r.headers.get('x-test-model-calls')};
+  }
+  await t.test('Edge Runtime real: gateway rejeita ausência de token e token inválido',async()=>{
+   for(const token of [null,'invalid'])assert.equal((await edgeCall(token,{pergunta:'teste'})).status,401);
+  });
+  await t.test('Edge Runtime real: inativo bloqueado antes de chamar provedor',async()=>{
+   const r=await edgeCall(accounts.inactive.token,{pergunta:'teste'});assert.equal(r.status,403);assert.equal(r.calls,'0');
+  });
+  await t.test('Edge Runtime real: ativo recebe resposta e CORS funciona',async()=>{
+   const r=await edgeCall(accounts.own.token,{pergunta:'teste',base:''});assert.equal(r.status,200);assert.equal(r.calls,'1');assert.equal(r.data.resposta,'Resposta sintética do provedor isolado');
+   assert.equal((await edgeCall(null,null,'OPTIONS')).status,200);
+  });
+  await t.test('Edge Runtime real: entrada vazia e quota tratadas sem expor detalhe',async()=>{
+   const invalid=await edgeCall(accounts.own.token,{pergunta:''});assert.equal(invalid.status,400);assert.equal(invalid.calls,'0');
+   const quota=await edgeCall(accounts.own.token,{pergunta:'simulate-quota'});assert.equal(quota.status,429);assert.equal(quota.data.categoria,'quota');assert.ok(!JSON.stringify(quota.data).includes('private-provider-detail'));
+  });
   await t.test('rollback restaura policies anteriores e preserva notas',async()=>{
    const before=(await db.query('SELECT count(*)::int n FROM avaliacoes_mensais')).rows[0].n;
    await db.query("SET farol.allow_unsafe_rollback='reviewed'");

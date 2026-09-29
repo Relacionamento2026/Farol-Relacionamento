@@ -22,7 +22,14 @@ jobs:
       - name: Start disposable local services (no cloud login/link)
         run: npx --no-install supabase start --workdir test-results/integration -x studio,imgproxy,logflare,vector,supavisor,edge-runtime,realtime,postgres-meta > test-results/integration/start.log
       - name: Test real local Auth, REST, Storage, RLS and rollback
-        run: node --test tests/integration/access.test.mjs
+        # Local function executes production handler; external model is intercepted.
+        # No cloud deployment and no provider key.
+        run: |
+          npx --no-install supabase functions serve --workdir test-results/integration > test-results/integration/functions.log 2>&1 &
+          node --test tests/integration/access.test.mjs
+      - name: Local runtime diagnostics on failure
+        if: failure()
+        run: tail -n 60 test-results/integration/functions.log
       - name: Delete disposable local volumes
         if: always()
         run: npx --no-install supabase stop --workdir test-results/integration --no-backup
