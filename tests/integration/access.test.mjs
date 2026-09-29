@@ -66,6 +66,12 @@ test('Supabase local real: Auth, REST, RLS, Storage e rollback',async t=>{
    assert.equal(ok(await request('/auth/v1/user',accounts.own.token)).id,accounts.own.id);
    denied(await request('/auth/v1/token?grant_type=password',null,'POST',{email:'own@example.test',password:'wrong'}));
   });
+  await t.test('Auth com cadastro público fechado: contas autorizadas entram; signup é negado',async()=>{
+   const before=(await db.query('SELECT count(*)::int n FROM auth.users')).rows[0].n;
+   const r=await request('/auth/v1/signup',null,'POST',{email:'unapproved@example.test',password:randomBytes(24).toString('hex')});
+   assert.ok([400,403,422].includes(r.status));assert.match(JSON.stringify(r.data),/signup.*disabled|signups.*not allowed/i);
+   assert.equal((await db.query('SELECT count(*)::int n FROM auth.users')).rows[0].n,before);
+  });
   await t.test('sem sessão e token inválido não recebem notas',async()=>{
    const anon=await request(notes);if(anon.status===200)assert.deepEqual(anon.data,[]);else denied(anon);
    denied(await request(notes,'invalid-token'));
