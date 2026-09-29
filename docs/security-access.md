@@ -29,7 +29,7 @@ Login Supabase → `getUser()` validado pelo Auth → leitura do próprio `profi
 | P1 / ATUAL → CORREÇÃO | RPC de colaboradores expõe lista sem controle do chamador | RPC invoker, acesso anônimo revogado, somente monitor/ADM recebe grupo | Anônimo negado, colaborador recebe zero |
 | P1 / ATUAL → CORREÇÃO | RPCs legadas SECURITY DEFINER aceitam IDs arbitrários e não possuem chamadores no HTML analisado | Revogação de execução para clientes; implementação preservada | Chamada direta negada; dependências externas necessitam validação |
 | P1 / ATUAL → CORREÇÃO | Policies de Storage permitem upload/atualização ampla | Escrita institucional por ADM; avatar no caminho exato do próprio usuário | Upload institucional/alheio negado |
-| P1 / ATUAL → CORREÇÃO | Edge v11 não verifica perfil ativo no handler | JWT validado e perfil consultado com RLS antes da IA; detalhes técnicos não devolvidos ao cliente | Handler completo com rede simulada |
+| P1 / ATUAL → CORREÇÃO | Edge v11 não verifica perfil ativo no handler | JWT validado e perfil consultado com RLS antes da IA; detalhes técnicos não devolvidos ao cliente | Runtime real com Auth/REST locais; provedor de IA simulado |
 | P2 / ATUAL → CORREÇÃO | Logout usa campos ausentes e listener pode reinvocar saída; login pendente pode reabrir tela | Limpeza tolerante a DOM ausente, controle de concorrência e listener sem chamada reentrante | Logout com erro e login pendente |
 | P2 / NOVO | Publicação não aguardava o workflow de sintaxe | Testes no próprio job de publicação; artefato limitado ao site | Revisão do YAML; primeira execução GitHub aprovada |
 
@@ -49,7 +49,7 @@ Login Supabase → `getUser()` validado pelo Auth → leitura do próprio `profi
 
 1. Confirmar no painel o nome e ref autorizados. Não executar `db push` contra projeto vinculado desconhecido. Não há deploy Supabase automático neste repositório.
 2. Capturar novamente schema/policies/grants/triggers e comparar com a referência; interromper se houver divergências. O snapshot de reversão acompanha apenas os objetos alterados, não substitui backup completo.
-3. Validar com usuários sintéticos em ambiente isolado autorizado, **sem usar TESTE**. Auth/Storage/REST e RLS foram verificados com Supabase local real/PostgreSQL 17 em executor descartável: 20 cenários aprovados incluindo navegador/SDK real (21 testes contando a suíte). Detalhes em `docs/homologacao-acessos.md`. Configuração corporativa, Realtime e Edge/Deno continuam **necessitando validação**.
+3. Validar com usuários sintéticos em ambiente isolado autorizado, **sem usar TESTE**. Auth/Storage/REST e RLS foram verificados com Supabase local real/PostgreSQL 17 em executor descartável: 25 cenários aprovados incluindo navegador/SDK e Edge Runtime reais (26 testes contando a suíte). Detalhes em `docs/homologacao-acessos.md`. Configuração corporativa, Realtime e provedor de IA real continuam **necessitando validação**.
 4. Executar `npm ci --ignore-scripts && npm test` em Node 24. Revisar/aprovar alterações de menus com os responsáveis.
 5. Obter snapshot privado de `SELECT id,email,role,ativo,avaliado FROM public.profiles ORDER BY id`. Guardar em `private-operations/snapshot.json`; decisões em `private-operations/decision.json` com chaves `monitored`, `monitors`, `departed` contendo e-mails. Nunca commitar estes arquivos: repositório é público.
 6. Gerar o par de SQL privado: `node ops/prepare-roster.cjs pvorwgrpkcofoukbqtyg private-operations/snapshot.json private-operations/decision.json private-operations/prepared`. O gerador rejeita outro projeto, quantidades diferentes de 10/2/6, reativação implícita, ausência de ADM e cadastros ausentes. Os SQL gerados travam `profiles` e comparam o estado antes de mudar; divergência cancela tudo. O gerador não conecta ao banco. O executor deve confirmar a conexão correta: o SQL sozinho não identifica um projeto Supabase.
@@ -64,6 +64,37 @@ A suíte usa Node 24, PGlite 0.5.8/PostgreSQL 18.3 e registros sintéticos. O pr
 
 Cobertura: identidade ausente/expirada, perfil inválido/inativo, acesso comum e de monitor/ADM, navegação administrativa, logout, login concorrente; SQL direto com `SET LOCAL ROLE` e identidade JWT simulada; leitura própria, escrita permitida, acesso cruzado negado, alteração de campos de autorização, proteção de avatar; Edge sem sessão e com conta inativa; geração da lista e reversão transacional. O teste de script valida sintaxe JavaScript, **não** renderização integral do HTML. Dez cenários de navegação/estado passaram em Chromium com SDK simulado, conforme `docs/homologacao-acessos.md`. Login por senha e revogação de refresh foram verificados no Auth local real; o teste adicional cobriu REST, Storage e rollback. Integração no navegador com SDK real passou no Supabase local. Configuração Auth corporativa e entrega de eventos ainda **necessitam validação**.
 
+## Cadastro de contas — configuração observada
+
+Em 29/09/2026, GET `/auth/v1/settings` do projeto autorizado confirmou
+`disable_signup=false`, `mailer_autoconfirm=true`, login por e-mail habilitado,
+login anônimo desabilitado e demais provedores externos desabilitados.
+A consulta foi somente leitura e não criou usuários. O trigger
+`on_auth_user_created` chama `handle_new_user()` após criação em Auth.
+
+**P0 / ATUAL → CORREÇÃO:** cadastro público habilitado e e-mail confirmado
+implicitamente são inadequados ao acesso interno por lista aprovada. A existência
+de hooks corporativos adicionais não foi comprovada: **necessita validação**.
+Fechar `Allow new users to sign up` no projeto FAROL RELACIONAMENTO e manter novos
+colaboradores em provisionamento administrativo autorizado. Não colocar chave
+administrativa no frontend. O HTML analisado não chama `auth.signUp`.
+
+A conexão MCP disponível não expõe alteração de configuração Auth; essa mudança
+não foi aplicada. Caminho no painel: Authentication → Sign In / Providers →
+Allow new users to sign up → desativar → salvar. A opção de e-mail deve continuar
+habilitada para preservar o login existente. Não mudar outras opções em conjunto.
+
+Validação: configuração pública deve retornar `disable_signup=true`; usuários
+existentes continuam entrando e cadastro não autorizado é rejeitado. A suíte
+local testa a combinação antes da aplicação corporativa. Não criar conta real
+para testar rejeição sem necessidade. Confirmar criação administrativa de novos
+colaboradores pelo fluxo autorizado.
+
+Rollback de configuração: restaurar o toggle anterior reabre cadastro público;
+somente considerar após revisão da necessidade e do risco. Não altera histórico
+ou notas e não substitui reversão de SQL. MFA, URLs de retorno, recuperação de
+senha, limites e hooks privados não são comprovados por `/auth/v1/settings`.
+
 ## Riscos residuais e próximas etapas
 
 - P1: buckets de materiais continuam públicos. URL pública não é protegida pela RLS de listagem. Migrar para buckets privados e URLs assinadas exige inventário de arquivos/links; **necessita validação**. Não prometer bloqueio total de ex-colaboradores enquanto URLs públicas existirem.
@@ -74,5 +105,7 @@ Cobertura: identidade ausente/expirada, perfil inválido/inativo, acesso comum e
 - P2: Realtime sem tabelas na publicação inspecionada. Mudanças de perfil são impostas pelo banco na próxima operação; atualização imediata da UI não foi comprovada.
 - P2: alteração de ativo/perfil durante sessão não apaga dados já entregues ao navegador. Rotinas assíncronas legadas fora do login ainda precisam de auditoria de cache/concorrência.
 - P3: CSP, dependências CDN, força de senha/recuperação e proteção contra XSS **necessitam validação**. O pacote não reescreve a V46 nem muda seu layout visual.
+
+Referência de configuração: https://supabase.com/docs/guides/auth/general-configuration
 
 Referências: Supabase Auth `getUser`, `onAuthStateChange`, `signOut`, RLS e segurança de Edge Functions; PostgreSQL CREATE POLICY. `USING` também vale como `WITH CHECK` quando este é omitido em UPDATE/ALL: ausência isolada de `WITH CHECK` não foi tratada como vulnerabilidade sem analisar a expressão.

@@ -25,7 +25,7 @@ São sete contas fictícias, incluindo dois monitores. O teste aceita apenas URL
 
 CLI fixada em 2.118.0 e pg em 8.23.0. Usa o fixture existente do aplicativo,
 conservando schemas/funções Auth e Storage reais. Não é uma cópia completa do
-banco corporativo. A configuração Auth de produção, Edge/Deno real, Realtime,
+banco corporativo. A configuração Auth de produção, Realtime,
 inventário integral de constraints/funções e configurações corporativas ainda necessitam validação.
 
 Para reproduzir em máquina com runtime de containers compatível:
@@ -35,6 +35,7 @@ npm ci
 npx --no-install playwright install --with-deps chromium
 node tests/integration/prepare.mjs
 npx --no-install supabase start --workdir test-results/integration -x studio,imgproxy,logflare,vector,supavisor,edge-runtime,realtime,postgres-meta
+npx --no-install supabase functions serve --workdir test-results/integration --env-file test-results/integration/functions.env > test-results/integration/functions.log 2>&1 &
 node --test tests/integration/access.test.mjs
 npx --no-install supabase stop --workdir test-results/integration --no-backup
 ```
@@ -79,7 +80,7 @@ e [Supabase local development](https://supabase.com/docs/guides/local-developmen
 | RPC de monitorados e RPC legada | Listagem respeita perfil; legado indisponível ao cliente comum |
 | Rollback | Policies anteriores restauradas e notas preservadas |
 | Manipulação do navegador / troca de perfil na UI | Aprovado também com SDK real e banco local real; recarga confirma perfil atual |
-| Edge | Handler com rede simulada aprovado; runtime Deno real pendente |
+| Edge | Runtime real aprovado com Auth/REST reais; somente provedor de IA simulado |
 | Realtime, recursos comuns e treinamentos completos | Necessita validação |
 
 Execução comprovada: [GitHub Actions 36629144752](https://github.com/Relacionamento2026/Farol-Relacionamento/actions/runs/36629144752),
@@ -143,3 +144,33 @@ A primeira tentativa precisou reconhecer o modal de avaliação pelo botão real
 A segunda expôs a troca de usuário antes da conclusão de signOut. Aguardar o
 signOut confirmou a causa; a correção na UI passou depois com a troca imediata,
 sem espera artificial no teste. Nenhuma mudança de layout foi feita.
+
+## Edge Runtime e cadastro fechado — validação concluída
+
+Em 29/09/2026, [execução 36634521968](https://github.com/Relacionamento2026/Farol-Relacionamento/actions/runs/36634521968),
+commit `8de540d0ce59e29741a0cf56667044cb2e9db50d`, aprovou **25 cenários integrados**
+(26 testes na contagem Node incluindo a suíte principal), sem falhas ou casos
+ignorados. Os 23 testes unitários/SQL também passaram nesse commit.
+
+A Edge executou o handler do pacote no runtime real, com verificação de JWT no
+gateway e consultas reais a Auth/REST locais. Ausência de token, token inválido e
+perfil inativo foram bloqueados; perfil ativo recebeu resposta; CORS, entrada
+vazia e erro de quota foram verificados. Usuário inativo não acionou o provedor.
+O cadastro público fechado rejeitou signup sem criar conta; contas provisionadas
+administrativamente continuaram autenticando.
+
+Somente a chamada ao modelo foi interceptada pelo wrapper de teste. A chave é
+fictícia e vem de arquivo de ambiente gerado exclusivamente na instância local;
+a tentativa inicial de configurar ambiente por Deno.env.set foi substituída por
+`functions serve --env-file`, compatível com o runtime. Não houve chamada paga.
+Qualidade das respostas, disponibilidade e quota real do Gemini não foram
+validadas. O wrapper nunca deve ser implantado: o código publicável permanece
+em `supabase/functions/pergunte-ao-farol/`.
+
+Containers e volumes fictícios foram descartados com sucesso. A configuração
+corporativa de cadastro continua pendente; instruções em `docs/security-access.md`.
+Nenhuma mudança deste pacote foi aplicada ao Farol em produção. Realtime,
+recuperação de senha, hooks privados e regressão integral dos módulos secundários
+continuam necessitando validação. Para reverter somente a instrumentação de
+testes, reverter alterações em `tests/integration/` e no workflow de homologação;
+isso não exige migration nem alteração de configuração remota.
