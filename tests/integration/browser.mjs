@@ -32,6 +32,10 @@ export async function verifyBrowser(t,status,accounts,db){
   const page=await browser.newPage({viewport:{width:1440,height:1000}});
   page.setDefaultTimeout(12000);
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  // Real evaluation acknowledgement is modal; dismiss via its actual UI button.
+  await page.addLocatorHandler(page.locator('#comemoracao5E'),async()=>{
+   await page.locator('#comemoracao5E button').click();
+  });
   await page.route('**/*',route=>{
    const url=new URL(route.request().url());
    return url.hostname==='127.0.0.1'&&['4173','54321'].includes(url.port)?route.continue():route.abort();
