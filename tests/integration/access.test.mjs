@@ -135,6 +135,13 @@ test('Supabase local real: Auth, REST, RLS, Storage e rollback',async t=>{
   });
   await db.query(readFileSync('ops/private-storage.sql','utf8'));
   ok(await request('/storage/v1/bucket/materiais',status.SERVICE_ROLE_KEY,'PUT',{public:false}));
+  await t.test('arquivo privado: ativo autorizado; anônimo e inativo bloqueados',async()=>{
+   const file='/storage/v1/object/authenticated/materiais/institucional/test.txt';
+   assert.equal(ok(await request(file,accounts.own.token)),'synthetic');
+   denied(await request(file,null));
+   denied(await request(file,accounts.inactive.token));
+   denied(await request('/storage/v1/object/public/materiais/institucional/test.txt',null));
+  });
   await verifyBrowser(t,status,accounts,db);
   await db.query(readFileSync('ops/rollback-private-storage-policies.sql','utf8'));
   const edge='/functions/v1/farol-validation';

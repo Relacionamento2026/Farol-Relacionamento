@@ -3344,6 +3344,7 @@ let authCheckInFlight = null;
 let logoutInFlight = false;
 
 function clearAuthenticatedState() {
+    if (window.farolPrivateFiles) window.farolPrivateFiles.clear();
     authEpoch++;
     authCheckInFlight = null;
     currentUser = null;
@@ -6949,7 +6950,6 @@ function setupEventListeners() {
             if (!supabaseClient) initSupabase();
             if (supabaseClient) {
                 supabaseClient.auth.onAuthStateChange((event, session) => {
-                    if (event === 'SIGNED_OUT') farolPrivateFiles.clear();
                     if (event === 'SIGNED_OUT') {
                         clearAuthenticatedState();
                     } else if (['SIGNED_IN','TOKEN_REFRESHED','USER_UPDATED'].includes(event) && session) {
@@ -10714,7 +10714,7 @@ const SUPABASE_AUTH_CONFIG = {
 };
 
 let supabaseClient = null;
-const farolPrivateFiles = FarolPrivateStorage.install(() => supabaseClient);
+const farolPrivateFiles = window.farolPrivateFiles = FarolPrivateStorage.install(() => supabaseClient);
 
 // [initSupabase v2 removida — duplicata da função na linha 6116]
 // ==================== SUPABASE AUTH HELPERS ====================
