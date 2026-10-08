@@ -2985,6 +2985,7 @@ img, iframe, video, svg { max-width: 100%; }
 
 <!-- JAVASCRIPT -->
 <script src="assets/access-control.js"></script>
+<script src="assets/private-storage.js"></script>
 <script>
 // ==================== ÍCONES SVG (Fase 4) ====================
 var ICON_PATHS = {
@@ -6948,6 +6949,7 @@ function setupEventListeners() {
             if (!supabaseClient) initSupabase();
             if (supabaseClient) {
                 supabaseClient.auth.onAuthStateChange((event, session) => {
+                    if (event === 'SIGNED_OUT') farolPrivateFiles.clear();
                     if (event === 'SIGNED_OUT') {
                         clearAuthenticatedState();
                     } else if (['SIGNED_IN','TOKEN_REFRESHED','USER_UPDATED'].includes(event) && session) {
@@ -8982,7 +8984,7 @@ async function persistProfilePhoto(file, dataUrl) {
     }
 }
 
-function loadProfilePhoto() {
+async function loadProfilePhoto() {
     if (!currentUser) return;
     const key = getProfilePhotoKey();
 
@@ -9017,7 +9019,9 @@ function loadProfilePhoto() {
 
     if (remoteUrl) {
         const version = key ? (localStorage.getItem('re_photo_v_' + key) || Date.now()) : Date.now();
-        const finalUrl = remoteUrl.indexOf('?') === -1 ? remoteUrl + '?v=' + version : remoteUrl;
+        remoteUrl = await farolPrivateFiles.resolve(remoteUrl).catch(() => null);
+        if (!remoteUrl) return;
+        const finalUrl = remoteUrl.startsWith('blob:') ? remoteUrl : (remoteUrl.indexOf('?') === -1 ? remoteUrl + '?v=' + version : remoteUrl);
         // Confirma que a imagem existe no Storage antes de aplicar
         const probe = new Image();
         probe.onload = function() { applyProfilePhoto(finalUrl); };
@@ -10710,6 +10714,7 @@ const SUPABASE_AUTH_CONFIG = {
 };
 
 let supabaseClient = null;
+const farolPrivateFiles = FarolPrivateStorage.install(() => supabaseClient);
 
 // [initSupabase v2 removida — duplicata da função na linha 6116]
 // ==================== SUPABASE AUTH HELPERS ====================

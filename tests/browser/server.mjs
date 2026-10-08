@@ -9,6 +9,7 @@ if (!page.includes('<script src="/mock.js"></script>')) throw new Error('SDK rep
 const routes = {
   '/': ['text/html', page],
   '/mock.js': ['text/javascript', readFileSync(new URL('mock.js', import.meta.url))],
+  '/assets/private-storage.js':['text/javascript',readFileSync(new URL('assets/private-storage.js', root))],
   '/assets/access-control.js': ['text/javascript', readFileSync(new URL('assets/access-control.js', root))]
 };
 http.createServer((req,res) => {

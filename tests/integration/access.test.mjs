@@ -133,7 +133,10 @@ test('Supabase local real: Auth, REST, RLS, Storage e rollback',async t=>{
    ok(await request('/auth/v1/logout',accounts.other.token,'POST'));
    denied(await request('/auth/v1/token?grant_type=refresh_token',null,'POST',{refresh_token:accounts.other.refresh}));
   });
+  await db.query(readFileSync('ops/private-storage.sql','utf8'));
+  ok(await request('/storage/v1/bucket/materiais',status.SERVICE_ROLE_KEY,'PUT',{public:false}));
   await verifyBrowser(t,status,accounts,db);
+  await db.query(readFileSync('ops/rollback-private-storage-policies.sql','utf8'));
   const edge='/functions/v1/farol-validation';
   // Browser logout revokes sessions, so acquire fresh local sessions for this phase.
   for(const who of ['own','inactive']){
