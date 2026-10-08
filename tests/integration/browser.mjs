@@ -18,11 +18,12 @@ export async function verifyBrowser(t,status,accounts,db){
   '/':['text/html',html],
   '/sdk.js':['text/javascript',readFileSync('node_modules/@supabase/supabase-js/dist/umd/supabase.js')],
   '/chart.js':['text/javascript',readFileSync('node_modules/chart.js/dist/chart.umd.js')],
+  '/assets/private-storage.js':['text/javascript',readFileSync(new URL('assets/private-storage.js', new URL('../../', import.meta.url)))],
   '/assets/access-control.js':['text/javascript',readFileSync('assets/access-control.js')]
  };
  const server=http.createServer((req,res)=>{
   const route=routes[new URL(req.url,'http://localhost').pathname];
-  res.setHeader('Content-Security-Policy',"default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: http://127.0.0.1:54321; connect-src 'self' http://127.0.0.1:54321 ws://127.0.0.1:54321; font-src 'self'; frame-src 'none'; form-action 'none'");
+  res.setHeader('Content-Security-Policy',"default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: http://127.0.0.1:54321; connect-src 'self' blob: http://127.0.0.1:54321 ws://127.0.0.1:54321; font-src 'self'; frame-src 'none'; form-action 'none'");
   res.writeHead(route?200:404,{'Content-Type':route?.[0]||'text/plain'});res.end(route?.[1]||'Not found');
  });
  await new Promise(r=>server.listen(4173,'127.0.0.1',r));
@@ -38,7 +39,7 @@ export async function verifyBrowser(t,status,accounts,db){
   });
   await page.route('**/*',route=>{
    const url=new URL(route.request().url());
-   return url.hostname==='127.0.0.1'&&['4173','54321'].includes(url.port)?route.continue():route.abort();
+   return url.protocol==='blob:'?route.continue():url.hostname==='127.0.0.1'&&['4173','54321'].includes(url.port)?route.continue():route.abort();
   });
   const login=async name=>{
    await page.locator('#userEmailInput').fill(name+'@example.test');
@@ -54,6 +55,16 @@ export async function verifyBrowser(t,status,accounts,db){
    assert.equal((await identity()).id,accounts.own.id);
    await page.reload();await page.waitForFunction(()=>currentRole==='user');
    assert.equal((await identity()).id,accounts.own.id);
+  });
+  await t.test('navegador: arquivo privado vira blob; logout revoga acesso local',async()=>{
+   await page.evaluate(()=>{
+    const a=document.createElement('a');a.id='private-file-test';a.href='https://pvorwgrpkcofoukbqtyg.supabase.co/storage/v1/object/public/materiais/institucional/test.txt';a.textContent='Arquivo privado';document.body.append(a);
+   });
+   await page.waitForFunction(()=>document.querySelector('#private-file-test').getAttribute('href')?.startsWith('blob:'));
+   const value=await page.evaluate(async()=>{const u=document.querySelector('#private-file-test').href;return (await fetch(u)).text();});
+   assert.equal(value,'synthetic');
+   await logout();assert.equal(await page.locator('#private-file-test').getAttribute('href'),null);
+   await login('own');await page.waitForFunction(()=>currentRole==='user');
   });
   await t.test('navegador: própria nota; localStorage/objeto alterados não ampliam RLS',async()=>{
    await page.locator('#nav-cinco-estrelas').click();
