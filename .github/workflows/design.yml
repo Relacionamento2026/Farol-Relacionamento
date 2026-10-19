@@ -1,0 +1,26 @@
+name: Verificar interface Canopus
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  browser:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npx --no-install playwright install --with-deps chromium
+      - run: node tests/browser/redesign.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: canopus-interface
+          path: test-results/design/
+          retention-days: 7
