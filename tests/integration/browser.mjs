@@ -15,6 +15,8 @@ export async function verifyBrowser(t,status,accounts,db){
  assert.ok(html.includes('URL":"http://127.0.0.1:54321"'));
  assert.ok(!html.includes(status.SERVICE_ROLE_KEY),'No administrative key in page');
  const routes={
+  '/assets/canopus-complete.css':['text/css',readFileSync(new URL('../../assets/canopus-complete.css', import.meta.url))],
+  '/assets/canopus-complete.js':['text/javascript',readFileSync(new URL('../../assets/canopus-complete.js', import.meta.url))],
   '/assets/canopus-theme.css':['text/css',readFileSync(new URL('../../assets/canopus-theme.css', import.meta.url))],
   '/assets/farol-chat.js':['text/javascript',readFileSync(new URL('../../assets/farol-chat.js', import.meta.url))],
   '/':['text/html',html],
