@@ -19,11 +19,12 @@ const search=$('.canopus-search');search.classList.add('cu-global-search');searc
 $('#dashSugestoes').hidden=true;
 const intro=$('#dashSaudacao').parentElement;intro.classList.add('cu-home-intro');intro.insertBefore(el('p','cu-home-subtitle','Conhecimento e ferramentas para o seu dia a dia.'),$('#dashData')); 
 const quick=$('.canopus-quick');quick.querySelectorAll('button').forEach(b=>b.insertAdjacentHTML('beforeend','<span class="cu-arrow" aria-hidden="true">›</span>'));
+quick.querySelector('[onclick*="trilha-onboarding"]')?.remove();
 const last=quick.lastElementChild;last.id='cu-results-shortcut';
 $('#page-user-profile').append($('#secaoConquistas'));
 const scoreHero=$('#page-cinco-estrelas').children[1];scoreHero.classList.add('cu-score-hero');
 const homeGrid=el('div','cu-home-grid');quick.after(homeGrid);
-const progress=panel('Onboarding na UNIC');progress.id='cu-progress';progress.querySelector('header').append(routeButton('Ver treinamentos →','trilha-onboarding'));homeGrid.append(progress);
+const progress=panel('Onboarding na UNIC');progress.id='cu-progress';homeGrid.append(progress);
 const notices=panel('Mural de avisos');notices.id='cu-notices';const noticeBody=el('div','cu-notice-list');noticeBody.id='cu-notice-list';notices.append(noticeBody);homeGrid.append(notices);
 const materials=panel('Materiais recentes');materials.classList.add('cu-home-materials');materials.querySelector('header').append(routeButton('Ver conteúdos →','central-conhecimento'));const materialBody=el('div','cu-material-list');materialBody.id='cu-material-list';materials.append(materialBody);homeGrid.append(materials);
 const empty=(node,text)=>{node.replaceChildren(el('p','cu-empty',text));};
@@ -31,7 +32,7 @@ function progressView(){
  if(!currentUser)return;
  const knowledgeNav=$('#nav-central-conhecimento');knowledgeNav.classList.remove('hidden');knowledgeNav.style.display='flex';
  progress.querySelector('.cu-progress-body')?.remove();
- progress.append(el('div','cu-progress-body',`<div><p>Faça os treinamentos na <strong>Universidade Canopus</strong>.</p><p>O Farol reúne os links e direciona você para a UNIC, onde os cursos são realizados.</p><a class="btn btn-primary" href="https://auth.mobiliza.com.br/?service=https://canopus.mobiliza.com.br/" target="_blank" rel="noopener noreferrer">Acessar UNIC ↗</a><p><small>Progresso e conclusão são acompanhados na UNIC.</small></p></div>`));
+ progress.append(el('div','cu-progress-body',`<div><p>Consulte os treinamentos e acesse os cursos na Universidade Canopus.</p><a class="btn btn-primary" href="https://auth.mobiliza.com.br/?service=https://canopus.mobiliza.com.br/" target="_blank" rel="noopener noreferrer">Acessar UNIC ↗</a><p><small>Progresso e conclusão são acompanhados na UNIC.</small></p></div>`));
  const canResults=currentRole==='admin'||currentUser.avaliado;
  last.onclick=()=>navigateTo(canResults?'cinco-estrelas':'user-profile');
  last.querySelector('strong').textContent=canResults?'Meus resultados':'Meu perfil';last.querySelector('span:not(.cu-arrow)').textContent=canResults?'Consulte suas notas e sua evolução.':'Consulte seus dados e sua atividade.';
@@ -70,7 +71,7 @@ const management=$('#page-gestor');const filters=$('#g-filtro-mes')?.closest('.a
 const mural=$('#g-mural-wrap');if(mural)management.append(mural);
 // Course page: airy journey cards and a compact university banner.
 const onboarding=$('#page-trilha-onboarding');onboarding.querySelector('.page-header h1').textContent='Onboarding — treinamentos na UNIC';onboarding.querySelector('.page-header p:last-child').classList.add('cu-onboarding-explainer');
-const banner=el('section','cu-unic-banner',`<div><span class="cu-eyebrow">UNIVERSIDADE CANOPUS</span><h2>Aprender faz parte da nossa jornada.</h2><p>Os cursos são realizados na UNIC. Aqui você encontra os links para acessá-los.</p><a href="https://auth.mobiliza.com.br/?service=https://canopus.mobiliza.com.br/" target="_blank" rel="noopener noreferrer">Acessar UNIC ↗</a></div><div class="cu-brand-art" aria-hidden="true">${sidebar.querySelector('.sidebar-logo').innerHTML}</div>`);onboarding.append(banner);
+const banner=el('section','cu-unic-banner',`<div><span class="cu-eyebrow">UNIVERSIDADE CANOPUS</span><h2>Aprender faz parte da nossa jornada.</h2><p>Os cursos são realizados na UNIC. Aqui você encontra os links para acessá-los.</p><a href="https://auth.mobiliza.com.br/?service=https://canopus.mobiliza.com.br/" target="_blank" rel="noopener noreferrer">Acessar UNIC ↗</a></div><div class="cu-brand-art" aria-hidden="true">${sidebar.querySelector('.sidebar-logo').innerHTML}</div>`);// A single explanatory notice above the catalog is sufficient; omit the repeated banner.
 // The Farol catalog links to UNIC; it does not track external completion.
 const oldUnicRender=renderTreinamentosUnic;
 renderTreinamentosUnic=function(){

@@ -130,3 +130,7 @@ body.canopus-complete #cm-panel-adm .adm-contato-linha>select,body.canopus-compl
 
 /* Training completion belongs to UNIC, not the Farol catalog. */
 body.canopus-complete #mod-hero-btn,body.canopus-complete #secaoConquistas{display:none!important;}
+
+/* Three distinct shortcuts; the UNIC block is the sole home training callout. */
+.canopus-complete .canopus-quick,.canopus-complete.chat-open .canopus-quick{grid-template-columns:repeat(3,minmax(0,1fr));}
+@media(max-width:700px){.canopus-complete .canopus-quick,.canopus-complete.chat-open .canopus-quick{grid-template-columns:1fr;}}
