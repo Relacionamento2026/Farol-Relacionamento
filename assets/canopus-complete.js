@@ -93,7 +93,8 @@ const oldProperties=renderAdministradoras;renderAdministradoras=function(data){o
 // Table wrappers ensure small screens scroll only inside tables, not the whole page.
 $$('.page-section table').forEach(t=>{if(!t.parentElement.classList.contains('cu-table-scroll')){const wrap=el('div','cu-table-scroll');wrap.tabIndex=0;wrap.setAttribute('role','region');wrap.setAttribute('aria-label','Tabela com rolagem horizontal');t.before(wrap);wrap.append(t);}});
 const oldUpdate=updateDashboard;updateDashboard=function(){oldUpdate();homeData();};
-const oldNav=navigateTo;navigateTo=function(page){oldNav(page);if($('#page-dashboard').classList.contains('active'))homeData();if(page==='user-profile')$('#page-user-profile').classList.add('cu-profile-page');};
+const oldShowApp=showApp;showApp=function(){oldShowApp();if(currentUser){$('#nav-central-conhecimento').classList.remove('hidden');$('#nav-central-conhecimento').style.display='flex';}};
+const oldNav=navigateTo;navigateTo=function(page){oldNav(page);if(page==='admin-content'&&currentRole==='admin'&&$('#page-admin-content').classList.contains('active'))loadFaqAdminList();if($('#page-dashboard').classList.contains('active'))homeData();if(page==='user-profile')$('#page-user-profile').classList.add('cu-profile-page');};
 const oldClear=clearAuthenticatedState;clearAuthenticatedState=function(){generation++;homeUser=null;empty(noticeBody,'');empty(materialBody,'');progress.querySelector('.cu-progress-body')?.remove();oldClear();};
 window.CanopusUI={refreshHome:()=>homeData(true)};
 })();

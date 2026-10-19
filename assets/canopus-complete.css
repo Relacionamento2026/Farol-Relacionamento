@@ -104,3 +104,10 @@
 .canopus-complete .cu-score-hero #ce-nf{color:var(--cu-ink)!important;}
 .canopus-complete .cu-score-hero #ce-mon,.canopus-complete .cu-score-hero #ce-cli{color:var(--cu-accent)!important;}
 .canopus-complete .cu-score-hero [style*="min-width:150px"]{background:var(--cu-bg)!important;border-color:var(--cu-line)!important;}
+
+.canopus-complete #avaliadorMenuSection .nav-item:not([data-page="avaliador-5e"]){display:none!important;}
+.canopus-complete .cm-panel.active{display:grid!important;}
+.canopus-complete #faqAdminList,.canopus-complete #admAdminList,.canopus-complete .cm-panel>.btn-group{grid-column:1/-1;}
+.canopus-complete .cm-panel>.u-fs11-fw700-tq-29,.canopus-complete #admContatos,.canopus-complete #admSindicos{grid-column:1/-1;}
+.canopus-complete #av-status-mes>div{border-radius:7px!important;}
+@media(max-width:700px){.canopus-complete .cm-panel.active{display:block!important;}}
