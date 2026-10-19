@@ -20,6 +20,8 @@ $('#dashSugestoes').hidden=true;
 const intro=$('#dashSaudacao').parentElement;intro.classList.add('cu-home-intro');intro.insertBefore(el('p','cu-home-subtitle','Conhecimento e ferramentas para o seu dia a dia.'),$('#dashData')); 
 const quick=$('.canopus-quick');quick.querySelectorAll('button').forEach(b=>b.insertAdjacentHTML('beforeend','<span class="cu-arrow" aria-hidden="true">›</span>'));
 const last=quick.lastElementChild;last.id='cu-results-shortcut';
+$('#page-user-profile').append($('#secaoConquistas'));
+const scoreHero=$('#page-cinco-estrelas').children[1];scoreHero.classList.add('cu-score-hero');
 const homeGrid=el('div','cu-home-grid');quick.after(homeGrid);
 const progress=panel('Meu progresso');progress.id='cu-progress';progress.querySelector('header').append(routeButton('Ver jornada →','trilha-onboarding'));homeGrid.append(progress);
 const notices=panel('Mural de avisos');notices.id='cu-notices';const noticeBody=el('div','cu-notice-list');noticeBody.id='cu-notice-list';notices.append(noticeBody);homeGrid.append(notices);
@@ -27,6 +29,7 @@ const materials=panel('Materiais recentes');materials.classList.add('cu-home-mat
 const empty=(node,text)=>{node.replaceChildren(el('p','cu-empty',text));};
 function progressView(){
  if(!currentUser)return;
+ const knowledgeNav=$('#nav-central-conhecimento');knowledgeNav.classList.remove('hidden');knowledgeNav.style.display='flex';
  const ids=['mod-onboarding-1','mod-onboarding-2','mod-onboarding-3','mod-onboarding-4'];
  const completed=ids.filter(id=>userProgress[id]?.completed).length,pct=Math.round(completed/ids.length*100);
  progress.querySelector('.cu-progress-body')?.remove();
@@ -80,10 +83,12 @@ const ckInput=$('.ck-search-box input');ckInput.setAttribute('aria-label','Busca
 function propertyWorkspace(){
  const list=$('#adm-lista'),cards=[...list.querySelectorAll('.adm-card')];if(!cards.length)return;
  const workspace=el('div','cu-property-workspace'),nav=el('nav','cu-property-list'),detail=el('div','cu-property-detail');nav.setAttribute('aria-label','Selecionar empreendimento');workspace.append(nav,detail);list.replaceChildren(workspace);
- cards.forEach((c,i)=>{c.removeAttribute('onclick');c.removeAttribute('onkeydown');c.removeAttribute('role');c.removeAttribute('tabindex');c.classList.add('expanded');c.hidden=i!==0;detail.append(c);const title=c.getAttribute('aria-label')||'Empreendimento';const b=button('',()=>{cards.forEach(x=>x.hidden=x!==c);[...nav.children].forEach(x=>x.setAttribute('aria-current',String(x===b)));},'cu-property-option');b.innerHTML=icon('building');const text=el('span','');text.textContent=title;b.append(text);b.dataset.search=c.dataset.busca;b.setAttribute('aria-current',String(i===0));nav.append(b);
+ cards.forEach((c,i)=>{c.removeAttribute('onclick');c.removeAttribute('onkeydown');c.removeAttribute('role');c.removeAttribute('tabindex');c.classList.add('expanded');c.hidden=i!==0;detail.append(c);const title=c.getAttribute('aria-label')||'Empreendimento';const b=button('',()=>{cards.forEach(x=>x.hidden=x!==c);[...nav.children].forEach(x=>x.setAttribute('aria-current',String(x===b)));},'cu-property-option');b.innerHTML=icon('building');const text=el('span','');text.textContent=title;b.append(text);b.dataset.search=c.dataset.busca;b.dataset.card=c.id;b.setAttribute('aria-current',String(i===0));nav.append(b);
  const body=c.querySelector('.adm-card-body');if(body){body.style.display='block';body.style.maxHeight='none';}c.querySelectorAll('[id^="adm-body-"]').forEach(n=>{n.style.display='block';n.style.maxHeight='none';});});
  $('#admFiltro').oninput=e=>{const q=normalizeText(e.target.value);[...nav.children].forEach(b=>b.hidden=!b.dataset.search.includes(q));const first=[...nav.children].find(b=>!b.hidden);if(first)first.click();else cards.forEach(c=>c.hidden=true);};
 }
+const oldToggleProperty=toggleAdmCard;toggleAdmCard=function(id){const option=$$('.cu-property-option').find(b=>b.dataset.card==='admcard-'+id);if(option)option.click();else oldToggleProperty(id);};
+const oldFilterProperties=filtrarAdministradoras;filtrarAdministradoras=function(term){if($('.cu-property-workspace')){$('#admFiltro').value=term;$('#admFiltro').dispatchEvent(new Event('input'));}else oldFilterProperties(term);};
 const oldProperties=renderAdministradoras;renderAdministradoras=function(data){oldProperties(data);propertyWorkspace();};
 // Table wrappers ensure small screens scroll only inside tables, not the whole page.
 $$('.page-section table').forEach(t=>{if(!t.parentElement.classList.contains('cu-table-scroll')){const wrap=el('div','cu-table-scroll');wrap.tabIndex=0;wrap.setAttribute('role','region');wrap.setAttribute('aria-label','Tabela com rolagem horizontal');t.before(wrap);wrap.append(t);}});

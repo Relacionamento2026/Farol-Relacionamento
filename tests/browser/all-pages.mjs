@@ -22,10 +22,10 @@ try{
   avaliacoes_mensais:[{competencia:'2026-09',nota_monitoria:4.6,nota_cliente:4.8,nota_final:4.68},{competencia:'2026-08',nota_monitoria:4.5,nota_cliente:4.7,nota_final:4.58}]
  });});
  const login=async role=>{await page.locator('#userEmailInput').fill(role+'@example.invalid');await page.locator('#userPasswordInput').fill('simulated');await page.locator('#btnLoginUser').click();await page.waitForFunction(()=>currentUser&&document.getElementById('loginScreen').classList.contains('hidden'));};
- const navigate=async route=>{await page.evaluate(r=>navigateTo(r),route);await page.waitForTimeout(650);assert.equal(await page.locator('#page-'+(route.startsWith('mod-')?'module-generic':route)).evaluate(n=>n.classList.contains('active')),true,route);};
+ const navigate=async route=>{await page.evaluate(r=>navigateTo(r),route);await page.waitForTimeout(650);await page.evaluate(()=>fecharComemoracao5E());assert.equal(await page.locator('#page-'+(route.startsWith('mod-')?'module-generic':route)).evaluate(n=>n.classList.contains('active')),true,route);};
  const noOverflow=async route=>{assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Horizontal overflow: '+route);};
- await login('user');await page.waitForTimeout(650);await page.evaluate(()=>CanopusUI.refreshHome());await shot('02-inicio');
- await page.locator('#farolChatLaunch').click();await shot('03-conversa-lateral');await page.evaluate(()=>FarolChat.close());
+ await login('user');await page.waitForTimeout(650);await page.evaluate(()=>{fecharComemoracao5E();return CanopusUI.refreshHome();});await shot('02-inicio');
+ await page.locator('#farolChatLaunch').click();assert.ok(await page.evaluate(()=>document.querySelector('.main-content').getBoundingClientRect().right<=document.getElementById('farolChat').getBoundingClientRect().left+1),'Chat must not cover desktop content');await shot('03-conversa-lateral');await page.evaluate(()=>FarolChat.close());
  const routes=[['respostas-faq','04-consultas-faq'],['administradoras','05-empreendimentos'],['trilha-onboarding','06-onboarding'],['central-conhecimento','07-central-conhecimento'],['cinco-estrelas','08-meus-resultados'],['user-profile','09-meu-perfil'],['mod-onboarding-1','10-modulo']];
  for(const [route,name] of routes){await navigate(route);await noOverflow(route);await shot(name);}
  await navigate('administradoras');assert.equal(await page.locator('.cu-property-option').count(),2);await page.locator('.cu-property-option').nth(1).click();assert.equal(await page.locator('.adm-card:visible').count(),1);await page.locator('#admFiltro').fill('demonstração A');assert.equal(await page.locator('.cu-property-option:visible').count(),1);
