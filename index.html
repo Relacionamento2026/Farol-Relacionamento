@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-<title>Farol Relacionamento — Conhecimento e Excelência no Atendimento</title>
+<title>Canopus Relacionamento — Conhecimento e Excelência no Atendimento</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -1435,6 +1435,7 @@ img, iframe, video, svg { max-width: 100%; }
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
 <!-- Chart.js e XLSX carregados sob demanda (ver loadScriptOnce) — jsPDF e html2canvas removidos: nunca eram usados no código (peso morto) -->
 <!-- base target removido -->
+<link rel="stylesheet" href="assets/canopus-theme.css">
 </head>
 <body>
 <button class="mobile-toggle" onclick="toggleSidebar()" aria-label="Abrir menu de navegação"><svg class="toggle-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
@@ -1453,7 +1454,7 @@ img, iframe, video, svg { max-width: 100%; }
 </svg>
             </div>
             <p style="font-size:11.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.75);margin:0 0 10px;">Uma iniciativa Canopus</p>
-            <h1 style="font-family:'Oswald',sans-serif;font-size:36px;font-weight:700;color:#fff;letter-spacing:-.5px;margin:0 0 12px;line-height:1.15;">Farol Relacionamento</h1>
+            <h1 style="font-family:'Oswald',sans-serif;font-size:36px;font-weight:700;color:#fff;letter-spacing:-.5px;margin:0 0 12px;line-height:1.15;">Canopus Relacionamento</h1>
             <p style="font-size:15px;color:rgba(255,255,255,.85);max-width:340px;line-height:1.6;margin:0;">Onde o conhecimento encontra direção. Consulte, com confiança, a resposta certa durante o atendimento.</p>
         </div>
     </div>
@@ -1519,16 +1520,15 @@ img, iframe, video, svg { max-width: 100%; }
 <!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
-        <div class="sidebar-logo"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:44px;height:44px;display:block;margin:auto;">
-  <path d="M32 16 L58 26 L32 36 L6 26 Z" fill="white"/>
-  <path d="M18 31 L18 42 C18 42 24 47 32 47 C40 47 46 42 46 42 L46 31 L32 37 Z" fill="white" opacity="0.92"/>
-  <circle cx="32" cy="26" r="2.5" fill="#0E8A82"/>
-  <line x1="58" y1="26" x2="58" y2="40" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
-  <circle cx="58" cy="42" r="2.6" fill="white"/>
+        <div class="sidebar-logo"><svg viewBox="0 0 364 370" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:32px;height:32px;display:block;" role="img" aria-label="Símbolo Canopus">
+  <path d="M127,18 L348,18 L237,130 L16,130 Z" fill="white"/>
+  <rect x="16" y="130" width="110" height="110" fill="white"/>
+  <circle cx="182" cy="184" r="33.5" fill="white"/>
+  <path d="M16,241 L237,241 L237,351 L126,351 Z" fill="white"/>
 </svg></div>
         <div class="u-6">
-            <div class="sidebar-title">FAROL<br>RELACIONAMENTO</div>
-            <div class="sidebar-subtitle">uma iniciativa Canopus</div>
+            <div class="sidebar-title">CANOPUS</div>
+            <div class="sidebar-subtitle">Relacionamento</div>
         </div>
     </div>
 
@@ -1840,12 +1840,12 @@ img, iframe, video, svg { max-width: 100%; }
             </div>
 
             <!-- ZONA 1: Busca inteligente — elemento dominante -->
-            <div style="margin-bottom:var(--space-10);position:relative;max-width:820px;">
+            <div class="canopus-search" style="margin-bottom:var(--space-10);position:relative;max-width:820px;">
                 <div class="u-32">
                     <svg class="ico" style="position:absolute;left:18px;top:50%;transform:translateY(-50%);color:var(--cinza);font-size:18px;pointer-events:none;" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.8-4.8"/></svg>
                     <input type="text"
                         id="dashboardSearchInput"
-                        placeholder="O que o cliente perguntou?"
+                        placeholder="Buscar procedimentos, dúvidas e empreendimentos…"
                         oninput="syncDashboardSearch(this.value)"
                         onkeydown="searchKeydown(event)"
                         autocomplete="off"
@@ -1860,6 +1860,7 @@ img, iframe, video, svg { max-width: 100%; }
                 <div id="dashSugestoes" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;"></div>
             </div>
 
+            <nav class="canopus-quick" aria-label="Acesso rápido"><button type="button" onclick="navigateTo('respostas-faq')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 4h6v16H4z M14 4h6v16h-6z"/></svg><strong>Consultas e FAQ</strong><span>Encontre orientações para o atendimento.</span></button><button type="button" onclick="navigateTo('administradoras')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M5 21V3h14v18 M9 7h6 M9 11h6 M9 15h6"/></svg><strong>Empreendimentos</strong><span>Consulte administradoras e contatos.</span></button><button type="button" onclick="navigateTo('trilha-onboarding')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2 8l10-5 10 5-10 5z M6 10v8h12v-8"/></svg><strong>Onboarding</strong><span>Acesse os treinamentos da UNIC.</span></button><button type="button" onclick="navigateTo('user-profile')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M8 7a4 4 0 1 0 8 0a4 4 0 1 0-8 0 M4 22v-3a8 8 0 0 1 16 0v3"/></svg><strong>Meu perfil</strong><span>Consulte seus dados e sua atividade.</span></button></nav>
             <!-- ZONA 2: 5 Estrelas (só para avaliados) ou atalhos rápidos (demais) -->
             <div id="dashboard-zona2">
                 <div id="zona2-skeleton" class="faixa-cards-grid">
@@ -3344,6 +3345,7 @@ let authCheckInFlight = null;
 let logoutInFlight = false;
 
 function clearAuthenticatedState() {
+    if (window.FarolChat) window.FarolChat.clear();
     if (window.farolPrivateFiles) window.farolPrivateFiles.clear();
     authEpoch++;
     authCheckInFlight = null;
@@ -6403,145 +6405,8 @@ function formatarRespostaFarol(texto) {
     return html || '<p style="font-size:14px;color:var(--azul-escuro);">' + escapeHtml(texto || '') + '</p>';
 }
 
-async function perguntarAoFarol(pergunta) {
-    var box = document.getElementById('dashboardSearchResults');
-    if (!box) return;
-
-    box.innerHTML = '<div style="padding:20px;display:flex;align-items:center;gap:12px;">'
-        + '<svg class="ico ico-spin" style="color:var(--turquesa);font-size:18px;" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke-opacity="0.25"/><path d="M20 12a8 8 0 0 0-8-8"/></svg>'
-        + '<span style="font-size:13.5px;color:var(--texto-leve);">O assistente do Farol está consultando a base de conhecimento...</span>'
-        + '</div>';
-    box.style.display = 'block';
-    box.classList.add('show');
-
-    // Atualiza o cache de FAQ/Empreendimentos antes de perguntar — sem isso, um
-    // empreendimento cadastrado recentemente (ou nesta mesma sessão) podia
-    // ficar de fora da busca até a pessoa visitar a tela de Empreendimentos
-    // pelo menos uma vez, já que o cache carregava só uma vez no login.
-    if (typeof precarregarBaseBusca === 'function') {
-        try { await precarregarBaseBusca(); } catch (_e) { /* segue com o que já tinha em cache */ }
-    }
-
-    try {
-        if (!supabaseClient) throw { categoria: 'rede', friendly: 'O assistente está temporariamente indisponível. Use os resultados da busca ou consulte os casos de atendimento.', detalhe: 'Sem conexão com o Supabase (supabaseClient não inicializado).' };
-        var res = await supabaseClient.functions.invoke('pergunte-ao-farol', {
-            body: { pergunta: pergunta, base: montarBaseConhecimento() }
-        });
-
-        if (res.error) {
-            // A lib do Supabase costuma devolver só "Edge Function returned a
-            // non-2xx status code", sem o corpo real que a função mandou —
-            // lê o corpo de verdade pra pegar a categoria e a mensagem certa.
-            var corpoErro = null;
-            if (res.error.context && typeof res.error.context.json === 'function') {
-                try { corpoErro = await res.error.context.clone().json(); } catch(_e) { /* corpo não era JSON */ }
-            }
-            throw {
-                categoria: (corpoErro && corpoErro.categoria) || 'desconhecido',
-                friendly: (corpoErro && corpoErro.error) || 'O assistente está temporariamente indisponível. Use os resultados da busca ou consulte os casos de atendimento.',
-                detalhe: (corpoErro && corpoErro.detalhe) || res.error.message || 'Erro na função (sem detalhe).'
-            };
-        }
-        var resposta = res.data && res.data.resposta;
-        if (!resposta) {
-            throw {
-                categoria: (res.data && res.data.categoria) || 'desconhecido',
-                friendly: (res.data && res.data.error) || 'O assistente não conseguiu gerar uma resposta.',
-                detalhe: (res.data && res.data.detalhe) || 'Resposta vazia (a função respondeu OK mas sem texto).'
-            };
-        }
-
-        // Registra a consulta ANTES de desenhar o card, porque os botões de
-        // feedback precisam do id da linha salva pra saber o que atualizar.
-        var consultaId = await registrarConsultaIA(pergunta, resposta);
-
-        box.innerHTML = '<div style="padding:0;">'
-            + '<div style="display:flex;align-items:center;gap:10px;padding:14px 20px;background:linear-gradient(135deg,var(--turquesa),var(--azul-medio));border-radius:12px 12px 0 0;">'
-            + '<div style="width:32px;height:32px;border-radius:9px;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;flex-shrink:0;">' + svgIcon('fa-lightbulb', '', 'style="width:17px;height:17px;color:#fff;"') + '</div>'
-            + '<div><div style="font-size:13.5px;font-weight:700;color:#fff;">Assistente do Farol</div>'
-            + '<div style="font-size:10.5px;color:rgba(255,255,255,.82);text-transform:uppercase;letter-spacing:.04em;">Resposta gerada por IA</div></div>'
-            + '</div>'
-            + '<div style="padding:18px 20px 4px;">' + formatarRespostaFarol(resposta) + '</div>'
-            + '<div style="font-size:11px;color:var(--cinza);margin:12px 20px 0;padding-top:12px;border-top:1px solid var(--borda);">'
-            + 'Resposta gerada com base nos casos e FAQ do Farol. Em situações críticas, confirme com sua coordenadora.'
-            + '</div>'
-            + '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px 16px;">'
-            + '<button onclick="clearSearchAll()" style="padding:8px 18px;background:var(--cinza-claro);border:1.5px solid var(--borda);border-radius:8px;font-size:12px;color:var(--texto-leve);cursor:pointer;font-family:\'Inter\',sans-serif;">Fechar</button>'
-            + (consultaId ? (
-                '<div class="farol-feedback" style="display:flex;align-items:center;gap:8px;">'
-                + '<span style="font-size:11.5px;color:var(--texto-leve);">Essa resposta ajudou?</span>'
-                + '<button onclick="enviarFeedbackIA(event,\'' + consultaId + '\',\'positivo\',this)" title="Ajudou" style="background:none;border:1.5px solid var(--borda);border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:14px;line-height:1;">👍</button>'
-                + '<button onclick="enviarFeedbackIA(event,\'' + consultaId + '\',\'negativo\',this)" title="Não ajudou" style="background:none;border:1.5px solid var(--borda);border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:14px;line-height:1;">👎</button>'
-                + '</div>'
-            ) : '')
-            + '</div>'
-            + '</div>';
-    } catch(e) {
-        // Mensagem amigável e categorizada na tela; o texto técnico completo
-        // (categoria + detalhe) vai só pro console — quem precisa investigar
-        // abre o DevTools, o usuário final só vê o texto amigável.
-        var categoria = e && e.categoria || 'desconhecido';
-        var friendly = (e && e.friendly) || 'O assistente inteligente ainda não está disponível. Use os resultados da busca ou consulte os casos de atendimento.';
-        var detalhe = (e && e.detalhe) || (e && e.message) || 'Erro desconhecido';
-        console.error('[Pergunte ao Farol][' + categoria + ']', detalhe);
-
-        // A IA (Gemini) falhou ou ficou sem cota — mas a resposta pode já existir
-        // na base real do Farol (FAQ/Empreendimentos no Supabase). Em vez de só
-        // avisar e mandar a pessoa procurar em outra tela, busca aqui mesmo por
-        // palavra-chave e mostra o que encontrar, pra continuar funcionando.
-        // A IA (Gemini) falhou ou ficou sem cota — mas talvez já exista uma
-        // resposta que a própria IA gerou antes, pra uma pergunta parecida.
-        // Reaproveitar essa resposta não gasta token nenhum, e a pessoa recebe
-        // um texto de verdade "escrito", não só uma lista de resultados.
-        var respostaCacheada = await buscarRespostaIACacheada(pergunta);
-        if (respostaCacheada) {
-            box.innerHTML = '<div style="padding:0;">'
-                + '<div style="display:flex;align-items:center;gap:10px;padding:14px 20px;background:linear-gradient(135deg,var(--turquesa),var(--azul-medio));border-radius:12px 12px 0 0;">'
-                + '<div style="width:32px;height:32px;border-radius:9px;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;flex-shrink:0;">' + svgIcon('fa-lightbulb', '', 'style="width:17px;height:17px;color:#fff;"') + '</div>'
-                + '<div><div style="font-size:13.5px;font-weight:700;color:#fff;">Assistente do Farol</div>'
-                + '<div style="font-size:10.5px;color:rgba(255,255,255,.82);text-transform:uppercase;letter-spacing:.04em;">Resposta reaproveitada de uma pergunta parecida</div></div>'
-                + '</div>'
-                + '<div style="padding:18px 20px 4px;">' + formatarRespostaFarol(respostaCacheada) + '</div>'
-                + '<div style="font-size:11px;color:var(--cinza);margin:12px 20px 0;padding-top:12px;border-top:1px solid var(--borda);">'
-                + 'O assistente de IA está temporariamente indisponível. Esta resposta foi gerada anteriormente para uma dúvida parecida.'
-                + '</div>'
-                + '<div style="padding:12px 20px 16px;"><button onclick="clearSearchAll()" style="padding:8px 18px;background:var(--cinza-claro);border:1.5px solid var(--borda);border-radius:8px;font-size:12px;color:var(--texto-leve);cursor:pointer;font-family:\'Inter\',sans-serif;">Fechar</button></div>'
-                + '</div>';
-            return;
-        }
-
-        // Sem resposta cacheada da IA também — cai pra busca crua no FAQ/Empreendimentos.
-        var fallback = buscarRespostaLocalFallback(pergunta);
-        if (fallback.length) {
-            var htmlFb = '<div style="padding:0;">'
-                + '<div style="display:flex;align-items:center;gap:10px;padding:14px 20px;background:var(--cinza-claro);border-bottom:1px solid var(--borda);border-radius:12px 12px 0 0;">'
-                + svgIcon('fa-circle-info', '', 'style="color:var(--cinza);flex-shrink:0;"')
-                + '<div style="font-size:12px;color:var(--texto-leve);line-height:1.5;">O assistente de IA está indisponível no momento. Encontramos isto na base de conhecimento:</div>'
-                + '</div>';
-            fallback.forEach(function(r) {
-                // Resposta completa, direto aqui — sem cortar texto e sem precisar
-                // clicar/navegar pra outra tela pra ver o resto, igual o Gemini já faz.
-                htmlFb += '<div style="padding:14px 20px;border-bottom:1px solid var(--borda);">'
-                    + '<div style="display:flex;align-items:center;gap:8px;width:100%;">' + svgIcon(r.icon, '', 'style="color:var(--turquesa);flex-shrink:0;"')
-                    + '<div style="font-size:13.5px;font-weight:700;color:var(--azul-escuro);">' + escapeHtml(r.title) + '</div></div>'
-                    + '<div style="font-size:12.5px;color:var(--texto-leve);line-height:1.6;padding-left:26px;margin-top:4px;">' + escapeHtml(r.resposta || '') + '</div>'
-                    + '<div style="padding-left:26px;margin-top:6px;">'
-                    + '<a href="#" onclick="openSearchResult(\'' + escapeHtml(r.target) + '\');return false;" style="font-size:11.5px;color:var(--turquesa-texto);font-weight:600;text-decoration:none;">Ver ficha completa</a>'
-                    + '</div>'
-                    + '</div>';
-            });
-            htmlFb += '<div style="padding:10px 20px 14px;"><button onclick="clearSearchAll()" style="padding:8px 18px;background:var(--cinza-claro);border:1.5px solid var(--borda);border-radius:8px;font-size:12px;color:var(--texto-leve);cursor:pointer;font-family:\'Inter\',sans-serif;">Fechar</button></div></div>';
-            box.innerHTML = htmlFb;
-            return;
-        }
-
-        box.innerHTML = '<div style="padding:18px 20px;">'
-            + '<div style="font-size:13px;color:var(--texto-leve);line-height:1.6;">'
-            + '<svg class="ico" style="color:var(--cinza);margin-right:6px;" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5"/><circle cx="12" cy="8" r="0.6" fill="currentColor" stroke="none"/></svg>'
-            + escapeHtml(friendly)
-            + ' Consulte os <a href="#" onclick="clearSearchAll();navigateTo(\'respostas-faq\');return false;" style="color:var(--turquesa-texto);font-weight:600;">casos de atendimento</a> enquanto isso.'
-            + '</div></div>';
-    }
+function perguntarAoFarol(pergunta) {
+    return window.FarolChat && window.FarolChat.ask(pergunta);
 }
 
 // Reaproveita respostas que a IA já gerou antes para perguntas parecidas —
@@ -6608,10 +6473,11 @@ function buscarRespostaLocalFallback(pergunta) {
 // Registra a consulta e devolve o id da linha salva — precisamos desse id
 // depois, se a pessoa clicar em 👍/👎, pra saber exatamente qual consulta
 // está recebendo o feedback.
-async function registrarConsultaIA(pergunta, respostaGerada) {
+async function registrarConsultaIA(pergunta, respostaGerada, expectedUserId) {
     try {
         if (!supabaseClient || !currentUser) { console.warn('[Farol][feedback] sem supabaseClient ou currentUser'); return null; }
         var sess = await supabaseClient.auth.getSession();
+        if (expectedUserId && (currentUser?.id !== expectedUserId || sess?.data?.session?.user?.id !== expectedUserId)) return null;
         if (!sess || !sess.data || !sess.data.session) { console.warn('[Farol][feedback] sem sessão ativa'); return null; }
         var res = await supabaseClient.from('consultas_realizadas').insert({
             colaborador_id: sess.data.session.user.id,
@@ -11292,5 +11158,6 @@ async function renderModuleFiles(moduleId) {
 
 </script>
 
-<div id="mobile-overlay" onclick="closeMobileSidebar()" aria-hidden="true" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:299"></div><style>#mobile-overlay.show{display:block!important}</style></body>
+<div id="mobile-overlay" onclick="closeMobileSidebar()" aria-hidden="true" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:299"></div><style>#mobile-overlay.show{display:block!important}</style><script src="assets/farol-chat.js"></script>
+</body>
 </html>
