@@ -15,7 +15,7 @@
 .canopus-complete .sidebar-footer button{width:100%;color:#d1e6ed!important;background:transparent!important;border:0!important;text-align:left;}
 .canopus-complete .main-content{margin-left:var(--cu-side);width:calc(100% - var(--cu-side));max-width:none;min-width:0;}
 .canopus-complete .site-footer{margin-left:var(--cu-side);background:var(--cu-surface);border-top:1px solid var(--cu-line);}
-.canopus-complete .top-bar{min-height:86px;padding:18px 28px;gap:20px;background:var(--cu-surface);border-bottom:1px solid var(--cu-line);}
+.canopus-complete .top-bar{position:sticky;top:16px;min-height:76px;margin:20px 32px 0;padding:16px 22px;gap:20px;background:var(--cu-surface);border:1px solid var(--cu-line);border-radius:20px;box-shadow:0 8px 28px #07334a0d;overflow:visible;}
 .canopus-complete .top-bar>.cu-global-search{flex:1;max-width:540px!important;margin:0!important;min-width:120px;}
 .canopus-complete .top-bar>.cu-global-search input{height:40px!important;border:1px solid #cfdee8!important;background:var(--cu-surface);font-size:12px!important;padding-left:42px!important;}
 .canopus-complete .top-bar>.cu-global-search svg{left:13px!important;width:17px;}
@@ -23,7 +23,10 @@
 .canopus-complete .top-bar>div:has(>.breadcrumb){display:none!important;}
 .canopus-complete .top-actions{gap:10px;flex-shrink:0;}
 .canopus-complete .top-btn{border:0;box-shadow:none;background:transparent;}
-.canopus-complete .canopus-chat-launch{padding:10px 14px;border-color:#4b849a;font-size:11px;}
+.canopus-complete .canopus-chat-launch{padding:11px 17px;border:1px solid #00566d;border-radius:999px;background:#00566d;color:#fff;font-size:12px;box-shadow:0 3px 10px #003c5017;white-space:nowrap;}
+.canopus-complete .canopus-chat-launch:hover{background:#004456;border-color:#004456;}
+.canopus-complete .top-actions>.user-menu-btn,.canopus-complete .top-actions .user-menu-btn{border:1px solid var(--cu-line);background:var(--cu-bg);}
+.canopus-complete .top-bar button:focus-visible{outline:3px solid #31aabd;outline-offset:3px;}
 .canopus-complete .content-area{padding:30px 32px 40px;max-width:1600px;margin:auto;}
 .canopus-complete .page-section{min-width:0;animation:none!important;}
 .canopus-complete .page-header{margin:0 0 26px;max-width:none;}
@@ -134,3 +137,8 @@ body.canopus-complete #mod-hero-btn,body.canopus-complete #secaoConquistas{displ
 /* Three distinct shortcuts; the UNIC block is the sole home training callout. */
 .canopus-complete .canopus-quick,.canopus-complete.chat-open .canopus-quick{grid-template-columns:repeat(3,minmax(0,1fr));}
 @media(max-width:700px){.canopus-complete .canopus-quick,.canopus-complete.chat-open .canopus-quick{grid-template-columns:1fr;}}
+
+/* Approved floating header: keep the original sidebar logo and all action handlers. */
+@media(max-width:1024px){.canopus-complete .top-bar{margin:16px 20px 0;top:12px;}}
+@media(max-width:700px){.canopus-complete .top-bar{margin:10px 10px 0;top:8px;border-radius:16px;padding:12px 14px 12px 54px!important;gap:10px;}.canopus-complete .top-actions{flex-wrap:wrap;}.canopus-complete .top-bar>.cu-global-search input{font-size:16px!important;}}
+.canopus-complete.dark-mode .top-bar{background:var(--cu-surface);border-color:var(--cu-line);box-shadow:0 8px 28px #0003;}
