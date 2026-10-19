@@ -13,6 +13,7 @@ try {
  await page.route('**/*',r=>new URL(r.request().url()).hostname==='127.0.0.1'?r.continue():r.abort());
  await page.goto('http://127.0.0.1:4173');
  const login=async(role='user')=>{await page.locator('#userEmailInput').fill(role+'@example.invalid');await page.locator('#userPasswordInput').fill('simulated');await page.locator('#btnLoginUser').click();await page.waitForFunction(()=>currentUser&&document.getElementById('loginScreen').classList.contains('hidden'));};
+ await page.screenshot({path:'test-results/design/login-desktop.png'});
  await login();
  await page.screenshot({path:'test-results/design/home-desktop.png',fullPage:true});
  await page.locator('#farolChatLaunch').click();
@@ -33,9 +34,11 @@ try {
  for(const width of [900,390]){
   await page.setViewportSize({width,height:844});
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'No page horizontal overflow');
+  if(width===390)await page.screenshot({path:'test-results/design/home-mobile.png',fullPage:true});
   await page.locator('#farolChatLaunch').click();
   assert.ok(await page.evaluate(()=>document.getElementById('farolChat').getBoundingClientRect().right<=innerWidth+1));
-  await page.screenshot({path:`test-results/design/chat-${width}.png`,fullPage:true});
+  assert.ok(await page.evaluate(()=>Math.abs(document.getElementById('farolChat').getBoundingClientRect().top)<1));
+  await page.screenshot({path:`test-results/design/chat-${width}.png`});
   await page.locator('#farolChatInput').press('Escape');
  }
  await page.setViewportSize({width:1440,height:1000});
@@ -55,6 +58,11 @@ try {
  await page.locator('#farolChatInput').fill('Pergunta sem resposta');await page.locator('#farolChatInput').press('Enter');
  await page.waitForFunction(()=>!document.querySelector('#farolChat [type=submit]').disabled);
  assert.match(await page.locator('#farolChatMessages').innerText(),/indisponível/);
+ await page.evaluate(()=>{FarolChat.clear();window.buscarRespostaIACacheada=async()=> 'Resposta anterior de teste';});
+ await page.locator('#farolChatLaunch').click();await page.locator('#farolChatInput').fill('Pergunta salva');await page.locator('#farolChatInput').press('Enter');
+ await page.waitForFunction(()=>!document.querySelector('#farolChat [type=submit]').disabled);
+ assert.match(await page.locator('#farolChatMessages').innerText(),/Resposta anterior de teste/);
+ assert.match(await page.locator('#farolChatMessages').innerText(),/gerada anteriormente/);
  await page.evaluate(()=>FarolChat.clear());await page.evaluate(()=>logout());await page.waitForFunction(()=>currentUser===null);
  await login('admin');await page.screenshot({path:'test-results/design/admin-desktop.png',fullPage:true});
  assert.deepEqual(errors,[]);

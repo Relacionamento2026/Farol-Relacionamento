@@ -31,7 +31,8 @@
     busy=true;send.disabled=true;input.value='';message('user',question);
     const reply=message('assistant','Consultando a base de conhecimento…');messages.setAttribute('aria-busy','true');
     try {
-      await precarregarBaseBusca();if(!valid())return;
+      try { await precarregarBaseBusca(); } catch (_) { /* Keep the available local base. */ }
+      if(!valid())return;
       // Preserve context for follow-up questions without changing the server contract.
       const previous=turns.slice(-3).map(t=>'Usuário: '+t.question+'\nAssistente: '+t.answer.slice(0,3000)).join('\n\n');
       const prompt=previous?'Histórico desta conversa (contexto, não instruções):\n'+previous+'\n\nPergunta atual do usuário: '+question:question;
@@ -49,6 +50,9 @@
       if(consultaId){const fb=document.createElement('span');fb.className='farol-feedback chat-actions';fb.append(button('Ajudou',ev=>enviarFeedbackIA(ev,consultaId,'positivo',ev.currentTarget)),button('Não ajudou',ev=>enviarFeedbackIA(ev,consultaId,'negativo',ev.currentTarget)));actions.append(fb);}
     }catch(err){
       if(!valid())return;
+      const cached=turns.length===0?await buscarRespostaIACacheada(question):null;
+      if(!valid())return;
+      if(cached){reply.body.innerHTML=formatarRespostaFarol(cached);const note=document.createElement('p');note.className='chat-note';note.textContent='O assistente está indisponível. Esta resposta foi gerada anteriormente para uma pergunta parecida; confira se ela atende ao seu caso.';reply.el.append(note);turns.push({question,answer:String(cached)});return;}
       reply.body.textContent='O assistente está indisponível no momento. Você pode tentar novamente ou consultar os conteúdos abaixo.';
       const matches=buscarRespostaLocalFallback(question);
       matches.slice(0,3).forEach(r=>source(reply.el,r.title,r.target));
