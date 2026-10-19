@@ -111,3 +111,10 @@
 .canopus-complete .cm-panel>.u-fs11-fw700-tq-29,.canopus-complete #admContatos,.canopus-complete #admSindicos{grid-column:1/-1;}
 .canopus-complete #av-status-mes>div{border-radius:7px!important;}
 @media(max-width:700px){.canopus-complete .cm-panel.active{display:block!important;}}
+/* Restored score data must retain its metric grid after the empty-state renderer clears inline display. */
+.canopus-complete #page-cinco-estrelas>div:nth-child(4):not([style*="display: none"]){display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;}
+.canopus-complete .cu-score-hero #ce-selo{color:#087a73!important;border-color:#b9dfdb!important;background:#e6f5f2!important;}
+.canopus-complete .cu-score-hero #ce-msg{color:#96610f!important;}
+.canopus-complete .cu-score-hero span[style*="#9FF0E6"]{color:#087a73!important;}
+.canopus-complete .cu-score-hero span[style*="#FFD89B"]{color:#96610f!important;}
+@media(max-width:700px){.canopus-complete #page-cinco-estrelas>div:nth-child(4):not([style*="display: none"]){grid-template-columns:repeat(2,minmax(0,1fr));}}
