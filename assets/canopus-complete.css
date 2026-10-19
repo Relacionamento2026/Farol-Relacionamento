@@ -118,3 +118,12 @@
 .canopus-complete .cu-score-hero span[style*="#9FF0E6"]{color:#087a73!important;}
 .canopus-complete .cu-score-hero span[style*="#FFD89B"]{color:#96610f!important;}
 @media(max-width:700px){.canopus-complete #page-cinco-estrelas>div:nth-child(4):not([style*="display: none"]){grid-template-columns:repeat(2,minmax(0,1fr));}}
+
+/* Keep the full property editor usable on narrow screens. */
+body.canopus-complete #cm-panel-adm>.form-row{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));}
+body.canopus-complete #cm-panel-adm input,body.canopus-complete #cm-panel-adm select{min-width:0;max-width:100%;}
+@media(max-width:700px){
+body.canopus-complete #cm-panel-adm .form-row{display:grid!important;grid-template-columns:minmax(0,1fr)!important;}
+body.canopus-complete #cm-panel-adm .adm-contato-linha,body.canopus-complete #cm-panel-adm .adm-sindico-bloco>div:first-child,body.canopus-complete #cm-panel-adm .sind-contatos>div{grid-template-columns:minmax(0,1fr) 42px!important;}
+body.canopus-complete #cm-panel-adm .adm-contato-linha>select,body.canopus-complete #cm-panel-adm .adm-sindico-bloco>div:first-child>select,body.canopus-complete #cm-panel-adm .sind-contatos>div>select{grid-column:1/-1;}
+}
