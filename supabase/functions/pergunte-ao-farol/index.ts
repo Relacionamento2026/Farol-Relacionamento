@@ -34,7 +34,7 @@ import { authorize } from "./authorize.js";
 // 'conteudo' | 'rede' | 'entrada' | 'desconhecido'
 // ============================================================================
 
-const GEMINI_MODEL = "gemini-3.1-flash-lite"; // nível gratuito: 1.500 req/dia, 30 req/min
+const GEMINI_MODEL = "gemini-3.1-flash-lite";
 const GEMINI_URL =
   `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
@@ -117,7 +117,7 @@ Deno.serve(async (req: Request) => {
     // Isso só acontece se o secret não foi configurado no projeto Supabase
     return erroCategorizado(
       "configuracao",
-      "O assistente está temporariamente indisponível (problema de configuração). A equipe técnica já foi avisada.",
+      "O assistente está temporariamente indisponível (problema de configuração).",
       "Secret GEMINI_API_KEY ausente no projeto Supabase.",
       500,
     );
@@ -204,6 +204,7 @@ Deno.serve(async (req: Request) => {
   try {
     geminiRes = await fetch(GEMINI_URL, {
       method: "POST",
+      signal: AbortSignal.timeout(25000),
       headers: {
         "Content-Type": "application/json",
         "x-goog-api-key": apiKey,
@@ -243,7 +244,7 @@ Deno.serve(async (req: Request) => {
     if (status === 429) {
       return erroCategorizado(
         "quota",
-        "O assistente atingiu o limite de uso gratuito por hoje. Tente novamente mais tarde, ou use os resultados da busca por enquanto.",
+        "O assistente atingiu um limite de uso do provedor. Tente novamente mais tarde, ou use os resultados da busca por enquanto.",
         detalhe,
         429,
       );
@@ -251,7 +252,7 @@ Deno.serve(async (req: Request) => {
     if (status === 401 || status === 403) {
       return erroCategorizado(
         "auth",
-        "O assistente está temporariamente indisponível (problema de autenticação). A equipe técnica já foi avisada.",
+        "O assistente está temporariamente indisponível (problema de autenticação).",
         detalhe,
         status,
       );
@@ -259,7 +260,7 @@ Deno.serve(async (req: Request) => {
     if (status === 404) {
       return erroCategorizado(
         "configuracao",
-        "O assistente está temporariamente indisponível (modelo de IA não encontrado). A equipe técnica já foi avisada.",
+        "O assistente está temporariamente indisponível (modelo de IA não encontrado).",
         detalhe,
         404,
       );
@@ -302,7 +303,7 @@ Deno.serve(async (req: Request) => {
 
   // deno-lint-ignore no-explicit-any
   const d = data as any;
-  const resposta = d?.candidates?.[0]?.content?.parts?.[0]?.text;
+  const resposta = d?.candidates?.[0]?.content?.parts?.filter((part: {text?: string; thought?: boolean}) => !part.thought && typeof part.text === "string").map((part: {text: string}) => part.text).join("\n");
 
   if (!resposta) {
     // Pode acontecer se o Gemini bloquear a resposta por segurança, etc.
