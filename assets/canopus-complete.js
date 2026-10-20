@@ -13,7 +13,29 @@ document.body.classList.add('canopus-complete');
 // Compact navigation matches the approved reference. Identity remains available in the top bar.
 const sidebar=$('#sidebar');
 const logoutButton=sidebar.querySelector('[onclick="logout()"]');if(logoutButton) sidebar.querySelector('.sidebar-footer')?.append(logoutButton);
-$$('.nav-item').forEach(n=>{const labels={'dashboard':'Início','respostas-faq':'Consultas e FAQ','cinco-estrelas':'Meus resultados','trilha-onboarding':'Onboarding'};if(labels[n.dataset.page]){const span=n.querySelector('span');if(span)span.textContent=labels[n.dataset.page];else [...n.childNodes].filter(x=>x.nodeType===3&&x.textContent.trim()).forEach(x=>x.textContent=' '+labels[n.dataset.page]);}});
+$$('.nav-item').forEach(n=>{const labels={'dashboard':'Início','respostas-faq':'Consultas e FAQ','cinco-estrelas':'Meus resultados','trilha-onboarding':'Treinamentos na UNIC'};if(labels[n.dataset.page]){const span=n.querySelector('span');if(span)span.textContent=labels[n.dataset.page];else [...n.childNodes].filter(x=>x.nodeType===3&&x.textContent.trim()).forEach(x=>x.textContent=' '+labels[n.dataset.page]);}});
+// Group existing links inside their original permission-controlled section.
+const mainMenu=$('#mainMenuSection');
+mainMenu?.querySelector('.nav-section-title')?.remove();
+for(const [label,routes] of [['Consultar',['respostas-faq','administradoras','central-conhecimento']],['Meu espaço',['cinco-estrelas','trilha-onboarding','user-profile']]]){
+ const group=el('div','cu-menu-group');group.append(el('p','cu-menu-heading',label));
+ routes.forEach(route=>{const link=mainMenu?.querySelector(`[data-page="${route}"]`);if(link)group.append(route==='trilha-onboarding'?link.parentElement:link);});
+ mainMenu?.append(group);
+}
+const manager=$('#nav-gestor');if(manager&&mainMenu)mainMenu.append(manager);
+const footer=sidebar.querySelector('.sidebar-footer');
+const help=el('details','cu-menu-help');const summary=el('summary','');summary.innerHTML=icon('question-circle')+'<span class="cu-nav-label">Ajuda</span>';summary.title='Ajuda';help.append(summary);
+footer?.querySelectorAll('a').forEach(a=>{if(a.getAttribute('href')?.startsWith('mailto:')||a.getAttribute('onclick')?.includes('showAboutModal'))help.append(a);});
+if(footer)footer.insertBefore(help,logoutButton||null);
+sidebar.querySelectorAll('.nav-item,.sidebar-footer a,.sidebar-footer button').forEach(n=>{
+ const label=n.textContent.trim();n.title=label;n.setAttribute('aria-label',label);
+ [...n.childNodes].filter(x=>x.nodeType===3&&x.textContent.trim()).forEach(x=>{const span=el('span','cu-nav-label');span.textContent=x.textContent.trim();x.replaceWith(span);});
+ [...n.children].filter(x=>x.tagName==='SPAN').forEach(x=>x.classList.add('cu-nav-label'));
+});
+const collapse=button('',()=>{const collapsed=document.body.classList.toggle('cu-menu-collapsed');collapse.setAttribute('aria-expanded',String(!collapsed));collapse.setAttribute('aria-label',collapsed?'Expandir menu':'Recolher menu');collapse.title=collapsed?'Expandir menu':'Recolher menu';if(collapsed)help.open=false;},'cu-menu-collapse');
+collapse.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16m6-12-3 4 3 4"/></svg><span class="cu-nav-label">Recolher menu</span>';
+collapse.setAttribute('aria-controls','sidebar');collapse.setAttribute('aria-expanded','true');collapse.setAttribute('aria-label','Recolher menu');collapse.title='Recolher menu';sidebar.querySelector('.sidebar-header').after(collapse);
+help.addEventListener('toggle',()=>{if(help.open&&document.body.classList.contains('cu-menu-collapsed')&&matchMedia('(min-width:1025px)').matches)collapse.click();});
 // Reuse the real search input and results, including keyboard behavior.
 const search=$('.canopus-search');search.classList.add('cu-global-search');search.querySelector('input').placeholder='Buscar na plataforma…';$('.top-bar').prepend(search);
 $('#dashSugestoes').hidden=true;

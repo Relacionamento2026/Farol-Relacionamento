@@ -227,3 +227,35 @@ body.canopus-complete .card-icon-d svg{width:20px;height:20px;}
 body.canopus-complete .cu-panel h2{font-weight:650;}
 @media(hover:hover){body.canopus-complete :is(.canopus-quick button,.ck-card,.cu-admin-shortcut,.cu-material):hover{border-color:#537e8c!important;box-shadow:0 5px 18px #123b4810!important;transform:none;background:var(--cu-icon-bg);}}
 @media(max-width:700px){body.canopus-complete :is(.cu-panel,.admin-panel,.dashboard-card,.card,.content-manager,.ck-card,.pdf-card){border-radius:16px!important;}}
+
+/* Approved grouped navigation, preserving the mobile drawer. */
+body.canopus-complete .cu-menu-heading{margin:20px 22px 8px;color:#a9c7cf;font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;}
+body.canopus-complete .sidebar .nav-item{gap:12px;min-height:46px;margin:4px 12px;border:1px solid transparent;border-radius:12px;line-height:1.4;}
+body.canopus-complete .sidebar .nav-item:hover{background:#ffffff0d;border-color:#ffffff18;}
+body.canopus-complete .sidebar .nav-item.active{background:#ffffff12;border-color:#ffffff20;box-shadow:inset 3px 0 #8cbac5;}
+body.canopus-complete .sidebar .nav-item svg{flex-shrink:0;width:20px;height:20px;margin-right:0;}
+body.canopus-complete .cu-menu-collapse{margin:12px 14px 4px;padding:10px;min-height:44px;display:flex;align-items:center;gap:12px;color:#c5dce2;background:transparent;border:1px solid #ffffff24;border-radius:10px;font-size:11px;cursor:pointer;}
+body.canopus-complete .cu-menu-collapse svg{width:20px;height:20px;flex-shrink:0;}
+body.canopus-complete .sidebar-footer{padding:10px 12px;}
+body.canopus-complete .sidebar-footer a,body.canopus-complete .sidebar-footer button,body.canopus-complete .cu-menu-help summary{display:flex;align-items:center;gap:12px;min-height:44px;border-radius:10px;}
+body.canopus-complete .cu-menu-help summary{padding:10px;color:#d1e6ed;font-size:12px;cursor:pointer;list-style:none;}
+body.canopus-complete .cu-menu-help summary::-webkit-details-marker{display:none;}
+body.canopus-complete .cu-menu-help summary svg{width:18px;height:18px;}
+body.canopus-complete .cu-menu-help summary::after{content:'⌄';margin-left:auto;}
+body.canopus-complete .cu-menu-help[open] summary::after{transform:rotate(180deg);}
+body.canopus-complete .cu-menu-help a{margin-left:14px;}
+body.canopus-complete .sidebar :is(a,button,summary,.nav-item):focus-visible{outline:2px solid #b1dce5;outline-offset:2px;}
+@media(min-width:1025px){
+ body.canopus-complete.cu-menu-collapsed{--cu-side:76px;}
+ body.canopus-complete.cu-menu-collapsed .sidebar-nav{padding-left:0;padding-right:0;}
+ body.canopus-complete.cu-menu-collapsed .sidebar-footer svg{margin-right:0;}
+ body.canopus-complete.cu-menu-collapsed .sidebar-footer button{margin:0;}
+ body.canopus-complete.cu-menu-collapsed .sidebar-header{padding:20px 18px;}
+ body.canopus-complete.cu-menu-collapsed .sidebar-title,body.canopus-complete.cu-menu-collapsed .sidebar .cu-nav-label,body.canopus-complete.cu-menu-collapsed .sidebar .nav-section-title,body.canopus-complete.cu-menu-collapsed .cu-menu-heading{display:none;}
+ body.canopus-complete.cu-menu-collapsed .sidebar .nav-item{margin:5px 12px;padding:12px;justify-content:center;}
+ body.canopus-complete.cu-menu-collapsed .cu-menu-group{border-top:1px solid #ffffff18;margin-top:12px;padding-top:8px;}
+ body.canopus-complete.cu-menu-collapsed .cu-menu-collapse{justify-content:center;padding:10px;}
+ body.canopus-complete.cu-menu-collapsed .sidebar-footer :is(a,button,summary){justify-content:center;}
+ body.canopus-complete.cu-menu-collapsed .cu-menu-help summary::after{display:none;}
+}
+@media(max-width:1024px){body.canopus-complete .cu-menu-collapse{display:none;}}

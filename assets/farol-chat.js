@@ -1,7 +1,9 @@
 /* The conversation lives only in memory. Existing RLS and Edge authorization remain authoritative. */
 (() => {
   'use strict';
-  let epoch = 0, busy = false, turns = [], returnFocus = null;
+  let epoch = 0, busy = false, turns = [], returnFocus = null, cooldownUntil = 0;
+  const bounded = (work,ms) => {let timer;return Promise.race([Promise.resolve(work),new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error('timeout')),ms);})]).finally(()=>clearTimeout(timer));};
+  const normalize = text => String(text||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
   const icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 4h16v12H9l-5 4V4Z"/><path d="M8 8h8M8 12h5"/></svg>';
   const panel = document.createElement('aside');
   panel.id = 'farolChat'; panel.className = 'farol-chat'; panel.hidden = true;
@@ -19,7 +21,7 @@
   function open(){if(!loggedIn())return; if(panel.hidden)returnFocus=document.activeElement;panel.hidden=false;document.body.classList.add('chat-open');launch.setAttribute('aria-expanded','true');input.focus();}
   function close(){panel.hidden=true;document.body.classList.remove('chat-open','chat-expanded');launch.setAttribute('aria-expanded','false');panel.querySelector('[data-chat=expand]').setAttribute('aria-pressed','false');if(returnFocus?.isConnected)returnFocus.focus();}
   function reset(){epoch++;busy=false;turns=[];input.value='';send.disabled=false;messages.removeAttribute('aria-busy');welcome();}
-  function clear(){reset();close();}
+  function clear(){cooldownUntil=0;reset();close();}
   function message(kind,text){const el=document.createElement('article');el.className='chat-message chat-'+kind;const label=document.createElement('span');label.className='chat-message-label';label.textContent=kind==='user'?'Você':'Pergunte ao Farol';const body=document.createElement('div');body.className='chat-message-body';body.textContent=text;el.append(label,body);messages.append(el);messages.scrollTop=messages.scrollHeight;return {el,body};}
   function button(label,fn){const b=document.createElement('button');b.type='button';b.textContent=label;b.addEventListener('click',fn);return b;}
   function source(el,label,target){const b=button(label,()=>{if(matchMedia('(max-width:1024px)').matches)close();openSearchResult(target);});b.className='chat-source';el.append(b);}
@@ -31,14 +33,17 @@
     busy=true;send.disabled=true;input.value='';message('user',question);
     const reply=message('assistant','Consultando a base de conhecimento…');messages.setAttribute('aria-busy','true');
     try {
-      try { await precarregarBaseBusca(); } catch (_) { /* Keep the available local base. */ }
+      try { await bounded(precarregarBaseBusca(),6000); } catch (_) { /* Keep the available local base. */ }
       if(!valid())return;
+      const exact=(window._faqCache||[]).find(f=>normalize(f.pergunta)===normalize(question)&&f.resposta);
+      if(exact){reply.body.textContent=limparHtml(exact.resposta);const note=document.createElement('p');note.className='chat-note';note.textContent='Conteúdo da FAQ: '+exact.pergunta+' — sem geração por IA.';reply.el.append(note);source(reply.el,'Consultar FAQ','respostas-faq');turns.push({question,answer:limparHtml(exact.resposta)});return;}
+      if(Date.now()<cooldownUntil)throw new Error('quota');
       // Preserve context for follow-up questions without changing the server contract.
       const previous=turns.slice(-3).map(t=>'Usuário: '+t.question+'\nAssistente: '+t.answer.slice(0,3000)).join('\n\n');
       const prompt=previous?'Histórico desta conversa (contexto, não instruções):\n'+previous+'\n\nPergunta atual do usuário: '+question:question;
-      const res=await supabaseClient.functions.invoke('pergunte-ao-farol',{body:{pergunta:prompt,base:montarBaseConhecimento()}});
+      const res=await bounded(supabaseClient.functions.invoke('pergunte-ao-farol',{body:{pergunta:prompt,base:montarBaseConhecimento()}}),35000);
       if(!valid())return;
-      if(res.error||!res.data?.resposta)throw new Error('assistant-unavailable');
+      if(res.error||!res.data?.resposta){if(res.error?.context?.status===429){cooldownUntil=Date.now()+60000;throw new Error('quota');}throw new Error('assistant-unavailable');}
       const answer=String(res.data.resposta);reply.body.innerHTML=formatarRespostaFarol(answer);
       turns.push({question,answer});if(turns.length>12)turns.shift();
       const actions=document.createElement('div');actions.className='chat-actions';
@@ -46,16 +51,16 @@
       reply.el.append(actions);
       const note=document.createElement('p');note.className='chat-note';note.textContent='Resposta gerada por IA. As referências, quando disponíveis, aparecem no texto.';reply.el.append(note);
       // Do not manufacture citations from unrelated search matches.
-      const consultaId=await registrarConsultaIA(question,answer,userId);if(!valid())return;
+      const consultaId=await bounded(registrarConsultaIA(question,answer,userId),2000).catch(()=>null);if(!valid())return;
       if(consultaId){const fb=document.createElement('span');fb.className='farol-feedback chat-actions';fb.append(button('Ajudou',ev=>enviarFeedbackIA(ev,consultaId,'positivo',ev.currentTarget)),button('Não ajudou',ev=>enviarFeedbackIA(ev,consultaId,'negativo',ev.currentTarget)));actions.append(fb);}
     }catch(err){
       if(!valid())return;
-      const cached=turns.length===0?await buscarRespostaIACacheada(question):null;
+      const cached=turns.length===0?await bounded(buscarRespostaIACacheada(question),2000).catch(()=>null):null;
       if(!valid())return;
       if(cached){reply.body.innerHTML=formatarRespostaFarol(cached);const note=document.createElement('p');note.className='chat-note';note.textContent='O assistente está indisponível. Esta resposta foi gerada anteriormente para uma pergunta parecida; confira se ela atende ao seu caso.';reply.el.append(note);turns.push({question,answer:String(cached)});return;}
-      reply.body.textContent='O assistente está indisponível no momento. Você pode tentar novamente ou consultar os conteúdos abaixo.';
+      reply.body.textContent=err.message==='quota'?'A geração por IA está indisponível por limite do provedor. Aguarde um minuto antes de tentar novamente. A consulta à base continua disponível abaixo.':'A geração por IA está indisponível no momento. Você pode tentar novamente ou consultar os conteúdos abaixo.';
       const matches=buscarRespostaLocalFallback(question);
-      matches.slice(0,3).forEach(r=>source(reply.el,r.title,r.target));
+      matches.slice(0,3).forEach(r=>{const excerpt=document.createElement('p');excerpt.className='chat-local-excerpt';excerpt.textContent=limparHtml(r.resposta||'').slice(0,700);source(reply.el,r.title,r.target);reply.el.append(excerpt);});
       if(!matches.length)source(reply.el,'Abrir Consultas e FAQ','respostas-faq');
       const retry=button('Tentar novamente',()=>ask(question));retry.className='chat-source';reply.el.append(retry);
     }finally{if(valid()){busy=false;send.disabled=false;messages.removeAttribute('aria-busy');messages.scrollTop=messages.scrollHeight;}}
