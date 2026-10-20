@@ -25,6 +25,7 @@
 .canopus-complete .top-btn{border:0;box-shadow:none;background:transparent;}
 .canopus-complete .canopus-chat-launch{padding:11px 17px;border:1px solid #00566d;border-radius:999px;background:#00566d;color:#fff;font-size:12px;box-shadow:0 3px 10px #003c5017;white-space:nowrap;}
 .canopus-complete .canopus-chat-launch:hover{background:#004456;border-color:#004456;}
+.canopus-complete.chat-open .canopus-chat-launch{display:none;}
 .canopus-complete .top-actions>.user-menu-btn,.canopus-complete .top-actions .user-menu-btn{border:1px solid var(--cu-line);background:var(--cu-bg);}
 .canopus-complete .top-bar button:focus-visible{outline:3px solid #31aabd;outline-offset:3px;}
 .canopus-complete .content-area{padding:30px 32px 40px;max-width:1600px;margin:auto;}
