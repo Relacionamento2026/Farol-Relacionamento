@@ -3,7 +3,7 @@
 .canopus-complete *{box-sizing:border-box;}
 .canopus-complete .sidebar{width:var(--cu-side);background:linear-gradient(160deg,#003c50,#00384b);display:flex;flex-direction:column;}
 .canopus-complete .sidebar-header{min-height:86px;padding:22px 20px;gap:10px;}
-.canopus-complete .sidebar-title{font-size:21px;}
+.canopus-complete .sidebar-title{font-size:17px;line-height:1.25;letter-spacing:-.4px;}
 .canopus-complete .sidebar-logo{width:40px;height:40px;}
 .canopus-complete .sidebar .user-info{display:none;}
 .canopus-complete .sidebar-nav{padding-top:12px;flex:1;overflow:auto;}
