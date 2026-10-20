@@ -1436,6 +1436,7 @@ img, iframe, video, svg { max-width: 100%; }
 <!-- Chart.js e XLSX carregados sob demanda (ver loadScriptOnce) — jsPDF e html2canvas removidos: nunca eram usados no código (peso morto) -->
 <!-- base target removido -->
 <link rel="stylesheet" href="assets/canopus-theme.css">
+<link rel="stylesheet" href="assets/canopus-complete.css">
 </head>
 <body>
 <button class="mobile-toggle" onclick="toggleSidebar()" aria-label="Abrir menu de navegação"><svg class="toggle-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
@@ -11159,5 +11160,6 @@ async function renderModuleFiles(moduleId) {
 </script>
 
 <div id="mobile-overlay" onclick="closeMobileSidebar()" aria-hidden="true" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:299"></div><style>#mobile-overlay.show{display:block!important}</style><script src="assets/farol-chat.js"></script>
+<script src="assets/canopus-complete.js"></script>
 </body>
 </html>

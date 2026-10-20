@@ -2,6 +2,7 @@
 // This deliberately does not implement RLS. Use SQL and real isolated Supabase tests for authorization.
 (() => {
   let profile = null;
+  const tables = {};
   const listeners = [];
   const events = [];
   const user = () => profile && {id:profile.id,email:profile.email};
@@ -10,7 +11,7 @@
     let single = false;
     const q = new Proxy({}, {get(_, key) {
       if (key === 'then') return (resolve,reject) => Promise.resolve({
-        data:table === 'profiles' ? (single ? profile : profile ? [profile] : []) : (single ? null : []),
+        data:table === 'profiles' ? (single ? profile : profile ? [profile] : []) : (single ? (tables[table]?.[0] || null) : (tables[table] || [])),
         error:null, count:0
       }).then(resolve,reject);
       return (...args) => {
@@ -42,5 +43,5 @@
   };
   window.supabase={createClient:()=>client};
   window.Chart=class {static register(){} static getChart(){return null;} destroy(){} update(){} };
-  window.__farolMock={events,expire(){profile=null;emit('SIGNED_OUT');},changeRole(role){if(profile)profile.role=role;emit('USER_UPDATED');}};
+  window.__farolMock={events,tables,expire(){profile=null;emit('SIGNED_OUT');},changeRole(role){if(profile)profile.role=role;emit('USER_UPDATED');}};
 })();

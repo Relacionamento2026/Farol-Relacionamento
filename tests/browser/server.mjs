@@ -7,6 +7,8 @@ const page = readFileSync(new URL('index.html', root), 'utf8')
   .replace(/<link[^>]+href="https:[^>]+>/g, '');
 if (!page.includes('<script src="/mock.js"></script>')) throw new Error('SDK replacement failed');
 const routes = {
+  '/assets/canopus-complete.css':['text/css',readFileSync(new URL('../../assets/canopus-complete.css', import.meta.url))],
+  '/assets/canopus-complete.js':['text/javascript',readFileSync(new URL('../../assets/canopus-complete.js', import.meta.url))],
   '/assets/canopus-theme.css':['text/css',readFileSync(new URL('../../assets/canopus-theme.css', import.meta.url))],
   '/assets/farol-chat.js':['text/javascript',readFileSync(new URL('../../assets/farol-chat.js', import.meta.url))],
   '/': ['text/html', page],

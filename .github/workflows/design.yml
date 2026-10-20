@@ -18,6 +18,7 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: npx --no-install playwright install --with-deps chromium
       - run: node tests/browser/redesign.mjs
+      - run: node tests/browser/all-pages.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
