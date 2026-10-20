@@ -21,6 +21,13 @@ const intro=$('#dashSaudacao').parentElement;intro.classList.add('cu-home-intro'
 const quick=$('.canopus-quick');quick.querySelectorAll('button').forEach(b=>b.insertAdjacentHTML('beforeend','<span class="cu-arrow" aria-hidden="true">›</span>'));
 quick.querySelector('[onclick*="trilha-onboarding"]')?.remove();
 const last=quick.lastElementChild;last.id='cu-results-shortcut';
+const shortcutArtwork=[
+ '<path d="M14 15a7 7 0 1 0-9-2L3 17l4-2a7 7 0 0 0 7 0Z"/><path d="M16 8a6 6 0 0 1 3 10l2 3-4-1a6 6 0 0 1-6-3"/>',
+ '<path d="M7 21V3h10v18M3 21V10h4m10 0h4v11M2 21h20M10 7h1m2 0h1m-4 4h1m2 0h1m-4 4h1m2 0h1m-3 6v-3h2v3"/>',
+ '<path d="M4 20v-5m5 5v-9m5 9v-6m5 6V8M3 10l6-5 5 3 7-6m-5 0h5v5"/>'
+];
+[...quick.children].forEach((b,i)=>{const svg=b.querySelector('svg');if(svg&&shortcutArtwork[i]){svg.setAttribute('viewBox','0 0 24 24');svg.setAttribute('fill','none');svg.setAttribute('stroke','currentColor');svg.setAttribute('stroke-width','1.7');svg.setAttribute('stroke-linecap','round');svg.setAttribute('stroke-linejoin','round');svg.innerHTML=shortcutArtwork[i];}});
+
 $('#page-user-profile').append($('#secaoConquistas'));
 const scoreHero=$('#page-cinco-estrelas').children[1];scoreHero.classList.add('cu-score-hero');
 const homeGrid=el('div','cu-home-grid');quick.after(homeGrid);
