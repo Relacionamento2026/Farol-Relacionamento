@@ -20,11 +20,16 @@ try {
  await page.locator('.cu-menu-collapse').click();
  assert.equal(await page.locator('.cu-menu-collapse').getAttribute('aria-expanded'),'false');
  assert.equal(await page.locator('#sidebar').evaluate(n=>Math.round(n.getBoundingClientRect().width)),76);
+ await page.waitForFunction(()=>Math.round(document.querySelector('.main-content').getBoundingClientRect().left)===76);
+ assert.equal(await page.locator('#mainMenuSection [data-page=dashboard] svg').evaluate(n=>Math.round(n.getBoundingClientRect().width)),20);
  await page.screenshot({path:'test-results/design/menu-collapsed.png',fullPage:true});
  await page.setViewportSize({width:390,height:844});
- await page.evaluate(()=>document.getElementById('sidebar').classList.add('open'));
+ await page.evaluate(()=>toggleSidebar());
+ await page.waitForFunction(()=>Math.round(document.getElementById('sidebar').getBoundingClientRect().left)===0);
+ assert.equal(await page.locator('#mainMenuSection [data-page=dashboard] .cu-nav-label').isVisible(),true);
+ await page.screenshot({path:'test-results/design/menu-mobile.png'});
  assert.equal(await page.locator('.cu-menu-collapse').isVisible(),false);
- await page.evaluate(()=>document.getElementById('sidebar').classList.remove('open'));
+ await page.evaluate(()=>closeMobileSidebar());
  await page.setViewportSize({width:1440,height:1000});
  await page.locator('.cu-menu-collapse').click();
 
