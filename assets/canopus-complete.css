@@ -259,3 +259,8 @@ body.canopus-complete .sidebar :is(a,button,summary,.nav-item):focus-visible{out
  body.canopus-complete.cu-menu-collapsed .cu-menu-help summary::after{display:none;}
 }
 @media(max-width:1024px){body.canopus-complete .cu-menu-collapse{display:none;}}
+
+/* Framed notification and theme controls in both color themes. */
+body.canopus-complete .top-actions .top-btn:not(.user-menu-btn){border:1px solid #a8c2cc;border-radius:13px;background:var(--cu-surface);box-shadow:0 2px 5px #07334a08;}
+body.canopus-complete .top-actions .top-btn:not(.user-menu-btn):hover{border-color:var(--cu-accent);background:var(--cu-bg);}
+body.canopus-complete.dark-mode .top-actions .top-btn:not(.user-menu-btn){border-color:#567787;}
