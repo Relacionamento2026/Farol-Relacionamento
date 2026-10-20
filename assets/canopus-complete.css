@@ -145,3 +145,52 @@ body.canopus-complete #mod-hero-btn,body.canopus-complete #secaoConquistas{displ
 .canopus-complete.dark-mode .top-bar{background:var(--cu-surface);border-color:var(--cu-line);box-shadow:0 8px 28px #0003;}
 
 .canopus-complete a.cu-material{color:inherit;text-decoration:none;}
+
+/* Mobile workspace: comfortable touch controls and compact content hierarchy. */
+@media(max-width:700px){
+ body.canopus-complete .top-bar{position:relative;top:0;margin:8px 12px 0;padding:8px 12px 12px!important;min-height:0;gap:8px;border-radius:18px;box-shadow:0 4px 18px #07334a08;}
+ body.canopus-complete .top-actions{padding-left:48px;min-height:44px;gap:8px;flex-wrap:nowrap;}
+ body.canopus-complete .top-btn{width:44px;height:44px;min-width:44px;}
+ body.canopus-complete .user-menu-btn{min-height:44px;padding:4px 8px!important;}
+ body.canopus-complete #topbarUserFirstName{display:none;}
+ body.canopus-complete .mobile-toggle{top:16px;left:24px;width:44px;height:44px;box-shadow:none;border-radius:12px;background:#003c50;}
+ body.canopus-complete .top-bar>.cu-global-search{min-width:0;flex-basis:100%;}
+ body.canopus-complete .top-bar>.cu-global-search input{height:46px!important;font-size:16px!important;}
+ body.canopus-complete .canopus-chat-launch{position:fixed;right:16px;bottom:max(16px,env(safe-area-inset-bottom));z-index:1100;min-height:48px;padding:12px 18px;font-size:13px;box-shadow:0 5px 20px #003c5033;}
+ body.canopus-complete .canopus-chat-launch svg{display:block;width:20px;height:20px;}
+ body.canopus-complete .content-area,body.canopus-complete.chat-open .content-area{padding:20px 16px 24px;}
+ body.canopus-complete .site-footer{padding-bottom:88px!important;}
+ body.canopus-complete #dashSaudacao{font-size:25px!important;letter-spacing:-.5px;}
+ body.canopus-complete .cu-home-intro{margin-bottom:18px!important;}
+ body.canopus-complete .cu-home-subtitle{font-size:14px;line-height:1.5;}
+ body.canopus-complete .canopus-quick{gap:10px;margin-bottom:18px;}
+ body.canopus-complete .canopus-quick button{display:grid;grid-template-columns:32px minmax(0,1fr);grid-template-rows:auto auto;column-gap:12px;row-gap:3px;min-height:88px;padding:16px 32px 16px 14px;border-radius:12px;text-align:left;align-content:center;}
+ body.canopus-complete .canopus-quick button>svg{grid-row:1/3;width:26px;height:26px;align-self:center;margin:0;}
+ body.canopus-complete .canopus-quick strong{font-size:15px;}
+ body.canopus-complete .canopus-quick span:not(.cu-arrow){font-size:12px;line-height:1.45;}
+ body.canopus-complete .canopus-quick .cu-arrow{right:12px;top:50%;bottom:auto;transform:translateY(-50%);}
+ body.canopus-complete .cu-panel{padding:16px;border-radius:12px;}
+ body.canopus-complete .cu-panel>header{margin-bottom:12px;}
+ body.canopus-complete .cu-progress-body{min-height:0;}
+ body.canopus-complete .cu-progress-body p{font-size:14px;line-height:1.5;}
+ body.canopus-complete .cu-progress-body small{font-size:12px;max-width:none;margin-top:8px;}
+ body.canopus-complete .cu-progress-body .btn{margin-top:12px;min-height:44px;}
+ body.canopus-complete .cu-notice{font-size:14px;}
+ body.canopus-complete .cu-notice time{font-size:12px;}
+ body.canopus-complete .cu-material{padding:14px;min-height:64px;border-radius:10px;}
+ body.canopus-complete .cu-material strong{font-size:14px;}
+ body.canopus-complete .cu-material small{font-size:12px;}
+ body.canopus-complete .cu-link{min-height:44px;display:inline-flex;align-items:center;font-size:13px;}
+ body.canopus-complete .page-section input:not([type=checkbox]):not([type=radio]),body.canopus-complete .page-section select,body.canopus-complete .page-section textarea{font-size:16px!important;min-height:44px;max-width:100%;}
+ body.canopus-complete .page-section .btn,body.canopus-complete .faq-chip{min-height:44px;}
+ body.canopus-complete .page-header p{font-size:14px;}
+ body.canopus-complete .cu-property-option{flex-shrink:0;min-height:64px;}
+ body.canopus-complete .farol-chat,body.canopus-complete.chat-expanded .farol-chat{height:100dvh;max-height:100dvh;top:0;bottom:auto;z-index:1500;}
+ body.canopus-complete .farol-chat-head{min-height:72px;padding:12px;gap:8px;}
+ body.canopus-complete .farol-chat-head button{min-width:44px;min-height:44px;}
+ body.canopus-complete .farol-chat-head [data-chat=expand],body.canopus-complete .farol-chat-head [aria-label='Recolher conversa']{display:none;}
+ body.canopus-complete .chat-compose textarea{font-size:16px;}
+ body.canopus-complete .chat-compose button{min-width:44px;min-height:44px;}
+ body.canopus-complete .chat-messages{padding:16px;}
+ body.canopus-complete .sidebar .nav-item{min-height:48px;font-size:14px;}
+}

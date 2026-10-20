@@ -36,6 +36,14 @@ try{
  for(const [route,name] of adminRoutes){await navigate(route);await noOverflow(route);await shot(name);if(route==='admin-content'){await page.locator('.cm-tab').filter({hasText:'Administradoras'}).click();await page.waitForTimeout(200);await shot('15-configuracoes-empreendimentos');}}
  await page.setViewportSize({width:390,height:844});
  for(const [route,name] of [...routes,...adminRoutes,['dashboard','02-inicio'],['avaliador-5e','11-monitoria']]){await navigate(route);if(route==='admin-content')await page.locator('.cm-tab').filter({hasText:'Gerenciar FAQ'}).click();await noOverflow('mobile '+route);await shot('mobile-'+name);if(route==='admin-content'){await page.locator('.cm-tab').filter({hasText:'Administradoras'}).click();await page.waitForTimeout(200);const clipped=await page.locator('#cm-panel-adm input:visible,#cm-panel-adm select:visible').evaluateAll(es=>es.filter(e=>e.getBoundingClientRect().right>innerWidth+1).map(e=>e.id||e.className));assert.deepEqual(clipped,[],'Property editor fields must fit mobile viewport');await shot('mobile-15-configuracoes-empreendimentos');}}
+ for(const width of [320,360,430]){
+  await page.setViewportSize({width,height:844});
+  for(const [route] of [...routes,...adminRoutes,['dashboard','']]){await navigate(route);await noOverflow(width+' '+route);}
+  const heights=await page.locator('.canopus-quick button').evaluateAll(es=>es.map(e=>e.getBoundingClientRect().height));assert.ok(heights.every(h=>h<125),'Home shortcuts must remain compact');
+  assert.ok(await page.locator('[onclick="toggleTheme()"]:visible').evaluate(e=>e.getBoundingClientRect().height>=44),'Theme touch target');
+  await page.locator('#farolChatLaunch').click();assert.equal(await page.locator('#farolChatLaunch').isVisible(),false);await noOverflow('chat '+width);await page.locator('[aria-label="Fechar conversa"]').click();assert.equal(await page.locator('#farolChatLaunch').isVisible(),true);
+  await shot('mobile-home-'+width);
+ }
  await page.evaluate(()=>logout());await page.waitForTimeout(100);assert.doesNotMatch(await page.locator('#cu-notice-list').innerText(),/Exemplo/);
  assert.deepEqual(errors,[]);await writeFile('test-results/design/screens.json',JSON.stringify(shots,null,2));console.log('PASS: complete route inventory, populated and empty UI, property selection, FAQ search, desktop/mobile overflow, session cleanup; '+shots.length+' captures.');
 }finally{await browser?.close();server.kill();}
