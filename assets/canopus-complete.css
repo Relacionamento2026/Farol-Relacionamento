@@ -201,3 +201,29 @@ body.canopus-complete .canopus-quick button>svg{width:56px;height:56px;padding:1
 body.canopus-complete.dark-mode .canopus-quick button,body.canopus-complete.dark-mode .cu-panel{border-color:#537b87;}
 body.canopus-complete.dark-mode .canopus-quick button>svg{color:#d8f4f6;background:linear-gradient(145deg,#244c5a,#173d4b);border-color:#618e99;box-shadow:inset 0 1px 0 #ffffff12,0 3px 8px #0002;}
 @media(max-width:700px){body.canopus-complete .canopus-quick button{grid-template-columns:44px minmax(0,1fr);}body.canopus-complete .canopus-quick button>svg{width:44px;height:44px;padding:9px;border-radius:12px;}}
+
+/* Shared restrained surface system: visible edges, neutral depth, no glow. */
+body.canopus-complete{--cu-line:#cbd9de;--cu-card-edge:#9db5bd;--cu-elevation:0 2px 4px #123b4804,0 8px 22px #123b4806;--cu-icon-bg:#edf3f4;--cu-icon-edge:#bacdd3;}
+body.canopus-complete.dark-mode{--cu-card-edge:#486572;--cu-elevation:0 4px 18px #0002;--cu-icon-bg:#203e4a;--cu-icon-edge:#486572;--cu-line:#315060;}
+body.canopus-complete :is(.cu-panel,.admin-panel,.dashboard-card,.card,.content-manager,.ck-card,.pdf-card,.cu-admin-shortcut,.cu-property-list,.adm-card,.cu-score-hero){border:1px solid var(--cu-card-edge)!important;border-radius:18px!important;box-shadow:var(--cu-elevation)!important;}
+body.canopus-complete .canopus-quick button{background:var(--cu-surface);border:1px solid var(--cu-card-edge);border-radius:18px;box-shadow:var(--cu-elevation);}
+body.canopus-complete .canopus-quick button>svg{background:var(--cu-icon-bg);border-color:var(--cu-icon-edge);box-shadow:none;color:var(--cu-ink);}
+body.canopus-complete .sidebar{background:#073b4b;}
+body.canopus-complete .sidebar .nav-item{border-radius:10px;}
+body.canopus-complete .sidebar .nav-item.active{background:#1c5868;box-shadow:inset 3px 0 #8cbac5;}
+body.canopus-complete .cu-property-option[aria-current=true]{background:var(--cu-icon-bg);box-shadow:inset 3px 0 #477e8a;color:var(--cu-ink);border-radius:10px;}
+body.canopus-complete .adm-card>div:first-child{background:#164e5f!important;}
+body.canopus-complete :is(.cu-material,.cu-help-details,.cu-table-scroll){border-radius:12px;}
+body.canopus-complete .cu-material{border-color:var(--cu-line);}
+body.canopus-complete :is(.btn-primary,.login-btn){border-radius:10px!important;}
+body.canopus-complete :is(input:not([type=checkbox]):not([type=radio]):not([type=file]),select,textarea){border-radius:10px!important;}
+body.canopus-complete .faq-item:first-child{border-radius:16px 16px 0 0;}
+body.canopus-complete .faq-item:last-child{border-radius:0 0 16px 16px;}
+body.canopus-complete .faq-item:only-child{border-radius:16px;}
+body.canopus-complete .faq-item{border-color:var(--cu-card-edge);}
+body.canopus-complete .cu-admin-shortcut>svg{width:44px;height:44px;padding:10px;background:var(--cu-icon-bg);border:1px solid var(--cu-icon-edge);border-radius:12px;color:var(--cu-ink);}
+body.canopus-complete .card-icon-d{width:40px;height:40px;background:var(--cu-icon-bg)!important;border:1px solid var(--cu-icon-edge);border-radius:10px;color:var(--cu-ink)!important;}
+body.canopus-complete .card-icon-d svg{width:20px;height:20px;}
+body.canopus-complete .cu-panel h2{font-weight:650;}
+@media(hover:hover){body.canopus-complete :is(.canopus-quick button,.ck-card,.cu-admin-shortcut,.cu-material):hover{border-color:#537e8c!important;box-shadow:0 5px 18px #123b4810!important;transform:none;background:var(--cu-icon-bg);}}
+@media(max-width:700px){body.canopus-complete :is(.cu-panel,.admin-panel,.dashboard-card,.card,.content-manager,.ck-card,.pdf-card){border-radius:16px!important;}}
