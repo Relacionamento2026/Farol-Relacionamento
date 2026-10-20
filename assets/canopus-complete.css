@@ -272,8 +272,8 @@ body.canopus-complete #cu-progress>header h2{font-size:16px;line-height:1.4;}
 body.canopus-complete #cu-progress .cu-progress-body{display:block;min-height:0;}
 body.canopus-complete #cu-progress .cu-progress-body>div{display:flex;flex-direction:column;align-items:flex-start;gap:14px;width:100%;}
 body.canopus-complete #cu-progress .cu-progress-body p{margin:0;font-size:13px;line-height:1.6;}
-body.canopus-complete #cu-progress .cu-progress-body .btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;width:auto;padding:10px 16px;margin:0;border:1px solid #9dbbc5;border-radius:10px;background:#edf4f6;color:#00566d;box-shadow:none;font-size:13px;font-weight:600;line-height:1.4;text-decoration:none;}
-body.canopus-complete #cu-progress .cu-progress-body .btn:hover{background:#e1edf1;border-color:#568a9a;}
+body.canopus-complete #cu-progress .cu-progress-body .btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;width:auto;padding:10px 16px;margin:0;border:1px solid #00566d;border-radius:10px;background:#00566d!important;color:#fff!important;box-shadow:none;font-size:13px;font-weight:600;line-height:1.4;text-decoration:none;}
+body.canopus-complete #cu-progress .cu-progress-body .btn:hover{background:#004456!important;border-color:#004456;}
 body.canopus-complete #cu-progress .cu-progress-body small{display:block;max-width:none;margin:0;font-size:11px;line-height:1.5;}
-body.canopus-complete.dark-mode #cu-progress .cu-progress-body .btn{background:#214654;border-color:#567c8b;color:#d5edf4;}
+body.canopus-complete.dark-mode #cu-progress .cu-progress-body .btn{background:#00566d!important;border-color:#7298a7;color:#fff!important;}
 @media(max-width:700px){body.canopus-complete #cu-progress{padding:18px;}body.canopus-complete #cu-progress .cu-progress-body p{font-size:14px;}body.canopus-complete #cu-progress .cu-progress-body small{font-size:12px;}}
