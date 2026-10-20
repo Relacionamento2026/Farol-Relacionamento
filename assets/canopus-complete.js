@@ -44,7 +44,7 @@ async function homeData(force=false){
  const valid=()=>ticket===generation&&currentUser?.id===user;
  const results=await Promise.allSettled([
   supabaseClient.from('avisos').select('id,texto,criado_em').eq('ativo',true).order('criado_em',{ascending:false}).limit(3),
-  supabaseClient.from('materiais').select('id,nome,descricao,modulo,criado_em').order('criado_em',{ascending:false}).limit(3)
+  supabaseClient.from('materiais').select('id,nome,descricao,modulo,criado_em,url').order('criado_em',{ascending:false}).limit(3)
  ]);if(!valid())return;
  const nr=results[0].status==='fulfilled'?results[0].value:null;
  if(!nr||nr.error)empty(noticeBody,'Não foi possível carregar os avisos. Tente atualizar a página.');
@@ -53,7 +53,7 @@ async function homeData(force=false){
  const mr=results[1].status==='fulfilled'?results[1].value:null;
  if(!mr||mr.error)empty(materialBody,'Não foi possível carregar os materiais. Tente atualizar a página.');
  else if(!mr.data?.length)empty(materialBody,'Os materiais cadastrados aparecerão aqui.');
- else{materialBody.replaceChildren();mr.data.forEach(m=>{const b=button('',()=>navigateTo(m.modulo&&m.modulo.startsWith('mod-')?m.modulo:'central-conhecimento'),'cu-material');b.innerHTML=icon('file-alt');const text=el('span','');const title=el('strong','');title.textContent=m.nome||'Material';const sub=el('small','');sub.textContent=m.descricao||'Consultar material';text.append(title,sub);b.append(text);materialBody.append(b);});}
+ else{materialBody.replaceChildren();mr.data.forEach(m=>{let url=null;try{const parsed=new URL(m.url);if(['https:','http:'].includes(parsed.protocol))url=parsed.href;}catch{}const b=url?el('a','cu-material'):routeButton('','central-conhecimento','cu-material');if(url){b.href=url;b.target='_blank';b.rel='noopener noreferrer';}b.innerHTML=icon('file-alt');const text=el('span','');const title=el('strong','');title.textContent=m.nome||'Material';const sub=el('small','');sub.textContent=m.descricao||'Consultar material';text.append(title,sub);b.append(text);materialBody.append(b);});}
 }
 // Page structures: retain form controls, IDs and event listeners, move actual nodes.
 function splitPage(id){const page=$('#page-'+id);const cards=[...page.children].filter(n=>n.classList.contains('admin-panel'));if(cards.length<2)return;const grid=el('div','cu-editor-layout');page.append(grid);cards.forEach(n=>grid.append(n));}

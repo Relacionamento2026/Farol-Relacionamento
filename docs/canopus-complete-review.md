@@ -1,18 +1,18 @@
 # Revisão completa Canopus — aguarda aprovação visual
 
-Esta revisão está em branch separada. Não publicar nem integrar ao main sem aprovação de Elias.
+Publicação autorizada por Elias em 19/10/2026 após revisão visual, condicionada às verificações automatizadas.
 
 Referência: prévias aprovadas com menu azul-petróleo, busca superior, cartões claros e conversa lateral.
 
 ## Cobertura
 
 - Login e recuperação de acesso: mesma identidade, formulário preservado.
-- Início: atalhos, progresso de módulos internos, avisos e materiais recentes; dados reais com estados vazios e erro. UNIC não informa progresso automaticamente.
+- Início: atalhos, acesso à UNIC, avisos e materiais recentes; dados reais com estados vazios e erro. UNIC não informa progresso automaticamente.
 - Pergunte ao Farol: painel lateral e continuidade da conversa já existentes, composição revisada.
 - Consultas e FAQ: filtro e coluna de categorias, respostas em acordeão.
 - Empreendimentos: lista de seleção e ficha de contatos; filtros e cópia preservados.
 - Onboarding: sequência de cards e acesso à UNIC.
-- Módulos: leitura e materiais na coluna principal, conclusão à direita.
+- Rotas antigas de onboarding direcionam ao catálogo UNIC; conclusão interna removida. Materiais recentes abrem o arquivo cadastrado.
 - Central de Conhecimento: catálogo e busca local nos itens autorizados.
 - Meus resultados: indicadores, evolução e histórico com os dados existentes.
 - Meu perfil: ficha pessoal e edição.

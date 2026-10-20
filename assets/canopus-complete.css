@@ -143,3 +143,5 @@ body.canopus-complete #mod-hero-btn,body.canopus-complete #secaoConquistas{displ
 @media(max-width:1024px){.canopus-complete .top-bar{margin:16px 20px 0;top:12px;}}
 @media(max-width:700px){.canopus-complete .top-bar{margin:10px 10px 0;top:8px;border-radius:16px;padding:12px 14px 12px 54px!important;gap:10px;}.canopus-complete .top-actions{flex-wrap:wrap;}.canopus-complete .top-bar>.cu-global-search input{font-size:16px!important;}}
 .canopus-complete.dark-mode .top-bar{background:var(--cu-surface);border-color:var(--cu-line);box-shadow:0 8px 28px #0003;}
+
+.canopus-complete a.cu-material{color:inherit;text-decoration:none;}

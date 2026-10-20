@@ -17,6 +17,7 @@ try {
  await login();
  await page.screenshot({path:'test-results/design/home-desktop.png',fullPage:true});
  await page.locator('#farolChatLaunch').click();
+ assert.equal(await page.locator('#farolChatLaunch').isVisible(),false);
  await page.evaluate(()=>{window.__prompts=[];supabaseClient.functions={invoke:async(name,{body})=>{__prompts.push(body.pergunta);return {data:{resposta:'## Orientação\nConsulte o Onboarding.\nFonte: FAQ: Treinamentos'},error:null};}};});
  await page.locator('#farolChatInput').fill('Onde encontro os treinamentos?');
  await page.locator('#farolChatInput').press('Enter');
@@ -31,6 +32,7 @@ try {
  await page.screenshot({path:'test-results/design/chat-desktop.png',fullPage:true});
  await page.locator('[data-chat=expand]').click();assert.equal(await page.locator('[data-chat=expand]').getAttribute('aria-pressed'),'true');
  await page.locator('#farolChatInput').press('Escape');assert.equal(await page.locator('#farolChat').isVisible(),false);
+ assert.equal(await page.locator('#farolChatLaunch').isVisible(),true);
  for(const width of [900,390]){
   await page.setViewportSize({width,height:844});
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'No page horizontal overflow');
