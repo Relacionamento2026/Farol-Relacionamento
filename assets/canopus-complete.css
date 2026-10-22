@@ -277,3 +277,41 @@ body.canopus-complete #cu-progress .cu-progress-body .btn:hover{background:#0044
 body.canopus-complete #cu-progress .cu-progress-body small{display:block;max-width:none;margin:0;font-size:11px;line-height:1.5;}
 body.canopus-complete.dark-mode #cu-progress .cu-progress-body .btn{background:#00566d!important;border-color:#7298a7;color:#fff!important;}
 @media(max-width:700px){body.canopus-complete #cu-progress{padding:18px;}body.canopus-complete #cu-progress .cu-progress-body p{font-size:14px;}body.canopus-complete #cu-progress .cu-progress-body small{font-size:12px;}}
+
+/* FAQ por área — filtros e variantes no mesmo espaço de leitura. */
+#page-respostas-faq .cu-faq-workspace{display:block;max-width:none!important}
+#page-respostas-faq #faqCategoriaChips{display:flex;flex-wrap:wrap!important;gap:10px!important;margin-bottom:14px!important;overflow:visible}
+#page-respostas-faq .faq-chip{display:flex;align-items:center;justify-content:center;gap:10px;min-height:46px;border:1px solid var(--cu-line);border-radius:13px;padding:10px 16px;background:var(--cu-surface);color:var(--cu-ink);white-space:normal}
+#page-respostas-faq .faq-chip.active{background:#00566d;color:#fff;border-color:#00566d}
+.faq-count{border-radius:20px;background:rgba(127,160,174,.17);padding:2px 7px;font-size:12px}
+.faq-chip.active .faq-count{background:rgba(255,255,255,.18)}
+.faq-topics{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.faq-topic{font:inherit;font-size:12px;border:1px solid var(--cu-line);border-radius:24px;background:var(--cu-surface);color:var(--cu-ink);padding:9px 13px;cursor:pointer;min-height:38px}
+.faq-topic.active{background:#dff1f5;color:#004d65;border-color:#93c5d1}
+.faq-result-count{font-size:13px;color:var(--cu-muted);margin:0 0 14px}
+.faq-area-list{display:grid;gap:12px}
+.canopus-complete .faq-item.faq-area-card{border:1px solid var(--cu-line);border-radius:18px;background:var(--cu-surface);box-shadow:0 3px 12px rgba(3,46,61,.035);overflow:hidden;margin:0}
+.faq-area-question{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:20px;cursor:pointer;list-style:none}
+.faq-area-question::-webkit-details-marker{display:none}
+.faq-area-title{min-width:0}
+.faq-area-title h3{font-size:16px;line-height:1.5;margin:7px 0 0;color:var(--cu-ink);overflow-wrap:anywhere}
+.faq-area-title small{display:block;margin-top:5px;color:var(--cu-muted);font-size:12px}
+.faq-area-badge{display:inline-block;border-radius:20px;background:var(--turquesa-light);color:var(--turquesa-texto);font-size:11px;font-weight:600;padding:4px 9px}
+.faq-chevron{font-size:23px;color:var(--cu-muted)}
+.faq-area-card[open] .faq-chevron{transform:rotate(180deg)}
+.faq-area-answer{padding:0 20px 20px}
+.faq-response{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.8;font-size:14px;color:var(--cu-ink)}
+.faq-area-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:20px;border-top:1px solid var(--cu-line);padding-top:16px}
+.faq-area-footer small{font-size:11px;color:var(--cu-muted)}
+.faq-copy{border:1px solid #00566d;border-radius:11px;background:#00566d;color:#fff;min-height:44px;padding:10px 20px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.faq-copy:hover{background:#004456}
+.faq-variant-label{display:block;font-size:12px;color:var(--cu-muted);margin-bottom:18px}
+.faq-variant{display:block;width:100%;min-height:46px;margin-top:7px;padding:10px;border:1px solid var(--cu-line);border-radius:10px;background:var(--cu-bg);color:var(--cu-ink);font:inherit;font-size:14px}
+.faq-personalize{font-size:12px;color:var(--cu-muted);margin:0 0 16px}
+.faq-personalize[hidden]{display:none}
+.faq-no-results{padding:24px;border:1px solid var(--cu-line);border-radius:18px;background:var(--cu-surface)}
+.faq-no-results p{margin-bottom:16px}
+#page-respostas-faq button:focus-visible,.faq-area-question:focus-visible,.faq-variant:focus-visible{outline:3px solid #49bcc4;outline-offset:3px}
+@media(max-width:700px){#page-respostas-faq #faqCategoriaChips{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))}.faq-area-question{padding:16px}.faq-area-answer{padding:0 16px 16px}.faq-area-footer{flex-wrap:wrap}.faq-copy{width:100%}.faq-area-title h3{font-size:15px}#page-respostas-faq .faq-chip{padding:10px 8px;font-size:12px}.faq-topics{gap:6px}.faq-topic{font-size:11px;padding:8px 10px}}
+
+body.canopus-complete.dark-mode #faqFiltro{color:var(--cu-ink)!important;background:var(--cu-surface)!important}
